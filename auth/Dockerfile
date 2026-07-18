@@ -9,6 +9,7 @@ COPY package.json yarn.lock .yarnrc.yml ./
 RUN yarn install --immutable
 
 COPY src ./src
+COPY docs ./docs
 
 EXPOSE 4000
 

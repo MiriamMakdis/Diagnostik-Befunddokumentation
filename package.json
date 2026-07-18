@@ -1,6 +1,7 @@
 {
     "name": "diagnostik-befunddokumentation",
     "private": true,
+    "type": "module",
     "scripts": {
         "docker:up": "docker compose up --build -d && docker compose logs -f auth-service workflow-backend",
         "dev": "docker compose up --build -d && docker compose logs -f auth-service workflow-backend",
@@ -15,6 +16,8 @@
         "backend:dev": "cd workflow-backend && yarn dev",
         "backend:start": "cd workflow-backend && yarn start",
         "backend:install": "cd workflow-backend && yarn install",
-        "install:all": "cd auth && yarn install && cd ../workflow-backend && yarn install"
+        "install:all": "cd auth && yarn install && cd ../workflow-backend && yarn install",
+        "keys:generate": "node scripts/generateJwtKeys.js",
+        "keys:generate:force": "node scripts/generateJwtKeys.js --force"
     }
 }

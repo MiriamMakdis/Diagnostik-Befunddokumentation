@@ -1,0 +1,462 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+      "title": "Auth-Service API",
+      "version": "1.0.0",
+      "description": "Auth-Service für den vertical Diagnostik und Befunddokumentation. Der Service stellt Demo-Logins bereit und erzeugt JWTs mit Rollen und Scopes."
+    },
+    "servers": [
+      {
+        "url": "http://localhost:4000",
+        "description": "Lokale Entwicklung"
+      }
+    ],
+    "tags": [
+      {
+        "name": "Health",
+        "description": "Status-Endpunkte des Auth-Service"
+      },
+      {
+        "name": "Auth",
+        "description": "Login, Tokenprüfung und Demo-Benutzer"
+      }
+    ],
+    "paths": {
+      "/health": {
+        "get": {
+          "tags": ["Health"],
+          "summary": "Health Check",
+          "description": "Prüft, ob der Auth-Service erreichbar ist.",
+          "operationId": "getAuthHealth",
+          "responses": {
+            "200": {
+              "description": "Auth-Service läuft.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HealthResponse"
+                  },
+                  "example": {
+                    "status": "UP",
+                    "service": "auth-service"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/auth/login": {
+        "post": {
+          "tags": ["Auth"],
+          "summary": "Login",
+          "description": "Meldet einen Demo-Benutzer an. Bei korrekten Zugangsdaten wird ein JWT zurückgegeben.",
+          "operationId": "login",
+          "requestBody": {
+            "required": true,
+            "description": "Benutzername und Passwort eines Demo-Benutzers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginRequest"
+                },
+                "examples": {
+                  "pflege": {
+                    "summary": "Pflegekraft",
+                    "value": {
+                      "username": "pflege",
+                      "password": "demo"
+                    }
+                  },
+                  "arzt": {
+                    "summary": "Arzt",
+                    "value": {
+                      "username": "arzt",
+                      "password": "demo"
+                    }
+                  },
+                  "radiologie": {
+                    "summary": "Radiologie-Technik",
+                    "value": {
+                      "username": "radiologie",
+                      "password": "demo"
+                    }
+                  },
+                  "radiologe": {
+                    "summary": "Radiologe",
+                    "value": {
+                      "username": "radiologe",
+                      "password": "demo"
+                    }
+                  },
+                  "auditor": {
+                    "summary": "Auditor",
+                    "value": {
+                      "username": "auditor",
+                      "password": "demo"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Login erfolgreich.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/LoginResponse"
+                  },
+                  "example": {
+                    "status": "SUCCESS",
+                    "message": "Login erfolgreich.",
+                    "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "tokenType": "Bearer",
+                    "expiresIn": "1h",
+                    "user": {
+                      "sub": "user-arzt-001",
+                      "username": "arzt",
+                      "displayName": "Demo Arzt",
+                      "role": "ER_DOCTOR",
+                      "scopes": [
+                        "patient:search",
+                        "workflow:read",
+                        "context:read",
+                        "radiology-order:create",
+                        "emergency-worklist:read",
+                        "report:read"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Benutzername oder Passwort fehlt.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  },
+                  "example": {
+                    "status": "ERROR",
+                    "errorCode": "VALIDATION_ERROR",
+                    "message": "username und password müssen angegeben werden."
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Benutzername oder Passwort ist falsch.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  },
+                  "example": {
+                    "status": "ERROR",
+                    "errorCode": "INVALID_CREDENTIALS",
+                    "message": "Benutzername oder Passwort ist falsch."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/auth/me": {
+        "get": {
+          "tags": ["Auth"],
+          "summary": "Aktuellen Benutzer abrufen",
+          "description": "Prüft das Bearer-Token und gibt die Benutzerinformationen aus dem JWT zurück.",
+          "operationId": "getCurrentUser",
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Token ist gültig.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/MeResponse"
+                  },
+                  "example": {
+                    "status": "SUCCESS",
+                    "user": {
+                      "sub": "user-arzt-001",
+                      "username": "arzt",
+                      "displayName": "Demo Arzt",
+                      "role": "ER_DOCTOR",
+                      "scopes": [
+                        "patient:search",
+                        "workflow:read",
+                        "context:read",
+                        "radiology-order:create",
+                        "emergency-worklist:read",
+                        "report:read"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Token fehlt, ist ungültig oder abgelaufen.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  },
+                  "examples": {
+                    "missingToken": {
+                      "summary": "Token fehlt",
+                      "value": {
+                        "status": "ERROR",
+                        "errorCode": "UNAUTHORIZED",
+                        "message": "Bearer Token fehlt."
+                      }
+                    },
+                    "invalidToken": {
+                      "summary": "Token ungültig",
+                      "value": {
+                        "status": "ERROR",
+                        "errorCode": "INVALID_TOKEN",
+                        "message": "Token ist ungültig oder abgelaufen."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/auth/demo-users": {
+        "get": {
+          "tags": ["Auth"],
+          "summary": "Demo-Benutzer anzeigen",
+          "description": "Gibt die verfügbaren Demo-Benutzer ohne Passwörter zurück.",
+          "operationId": "getDemoUsers",
+          "responses": {
+            "200": {
+              "description": "Demo-Benutzer wurden erfolgreich geladen.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DemoUsersResponse"
+                  },
+                  "example": {
+                    "status": "SUCCESS",
+                    "users": [
+                      {
+                        "username": "pflege",
+                        "displayName": "Demo Pflegekraft",
+                        "role": "ER_NURSE",
+                        "scopes": [
+                          "patient:search",
+                          "intake:create",
+                          "workflow:read",
+                          "emergency-worklist:read"
+                        ]
+                      },
+                      {
+                        "username": "arzt",
+                        "displayName": "Demo Arzt",
+                        "role": "ER_DOCTOR",
+                        "scopes": [
+                          "patient:search",
+                          "workflow:read",
+                          "context:read",
+                          "radiology-order:create",
+                          "emergency-worklist:read",
+                          "report:read"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT",
+          "description": "JWT aus dem Login-Endpunkt. In Swagger normalerweise nur den Token einfügen, nicht zusätzlich 'Bearer'."
+        }
+      },
+      "schemas": {
+        "HealthResponse": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "example": "UP"
+            },
+            "service": {
+              "type": "string",
+              "example": "auth-service"
+            }
+          }
+        },
+        "LoginRequest": {
+          "type": "object",
+          "required": ["username", "password"],
+          "properties": {
+            "username": {
+              "type": "string",
+              "example": "arzt"
+            },
+            "password": {
+              "type": "string",
+              "example": "demo"
+            }
+          }
+        },
+        "LoginResponse": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "example": "SUCCESS"
+            },
+            "message": {
+              "type": "string",
+              "example": "Login erfolgreich."
+            },
+            "accessToken": {
+              "type": "string",
+              "description": "JWT Access Token"
+            },
+            "tokenType": {
+              "type": "string",
+              "example": "Bearer"
+            },
+            "expiresIn": {
+              "type": "string",
+              "example": "1h"
+            },
+            "user": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        },
+        "MeResponse": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "example": "SUCCESS"
+            },
+            "user": {
+              "$ref": "#/components/schemas/User"
+            }
+          }
+        },
+        "DemoUsersResponse": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "example": "SUCCESS"
+            },
+            "users": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DemoUser"
+              }
+            }
+          }
+        },
+        "User": {
+          "type": "object",
+          "properties": {
+            "sub": {
+              "type": "string",
+              "example": "user-arzt-001"
+            },
+            "username": {
+              "type": "string",
+              "example": "arzt"
+            },
+            "displayName": {
+              "type": "string",
+              "example": "Demo Arzt"
+            },
+            "role": {
+              "type": "string",
+              "example": "ER_DOCTOR",
+              "enum": [
+                "ER_NURSE",
+                "ER_DOCTOR",
+                "RAD_TECH",
+                "RADIOLOGIST",
+                "AUDITOR",
+                "ADMIN"
+              ]
+            },
+            "scopes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                "patient:search",
+                "workflow:read",
+                "radiology-order:create"
+              ]
+            }
+          }
+        },
+        "DemoUser": {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string",
+              "example": "arzt"
+            },
+            "displayName": {
+              "type": "string",
+              "example": "Demo Arzt"
+            },
+            "role": {
+              "type": "string",
+              "example": "ER_DOCTOR"
+            },
+            "scopes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "ErrorResponse": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "example": "ERROR"
+            },
+            "errorCode": {
+              "type": "string",
+              "example": "INVALID_CREDENTIALS"
+            },
+            "message": {
+              "type": "string",
+              "example": "Benutzername oder Passwort ist falsch."
+            }
+          }
+        }
+      }
+    }
+  }
