@@ -1,0 +1,46 @@
+services:
+  auth-service:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./secrets/jwt-private.pem:/run/secrets/jwt-private.pem:ro
+    networks:
+      - diag-bef-network
+
+  workflow-backend:
+    build:
+      context: ./workflow-backend
+      dockerfile: Dockerfile
+    container_name: workflow-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./workflow-backend/.env
+    volumes:
+      - ./secrets/jwt-public.pem:/run/secrets/jwt-public.pem:ro
+    depends_on:
+      - auth-service
+      - mongodb
+    networks:
+      - diag-bef-network
+
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - diag-bef-network
+
+volumes:
+  mongodb-data:
+
+networks:
+  diag-bef-network:
+    driver: bridge
