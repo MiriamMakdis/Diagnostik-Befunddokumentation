@@ -12,4 +12,4 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/api/v1/auth', authApi);
+app.use('/api/auth', authApi);
