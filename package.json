@@ -1,0 +1,20 @@
+{
+    "name": "diagnostik-befunddokumentation",
+    "private": true,
+    "scripts": {
+        "docker:up": "docker compose up --build -d && docker compose logs -f auth-service workflow-backend",
+        "dev": "docker compose up --build -d && docker compose logs -f auth-service workflow-backend",
+        "docker:up:detached": "docker compose up --build -d",
+        "docker:down": "docker compose down",
+        "docker:logs": "docker compose logs -f",
+        "docker:restart": "docker compose down && docker compose up --build",
+        "docker:clean": "docker compose down -v --remove-orphans",
+        "auth:dev": "cd auth && yarn dev",
+        "auth:start": "cd auth && yarn start",
+        "auth:install": "cd auth && yarn install",
+        "backend:dev": "cd workflow-backend && yarn dev",
+        "backend:start": "cd workflow-backend && yarn start",
+        "backend:install": "cd workflow-backend && yarn install",
+        "install:all": "cd auth && yarn install && cd ../workflow-backend && yarn install"
+    }
+}

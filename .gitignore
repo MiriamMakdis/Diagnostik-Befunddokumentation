@@ -1,4 +1,22 @@
+# node_modules nie committen, egal wo
 node_modules/
 
-.yarn/*
+# Root-Level Install-Artefakte ignorieren, falls jemand aus Versehen im Top-Level yarn/npm install ausführt
+/yarn.lock
+/package-lock.json
+/package-lock.json
+/npm-shrinkwrap.json
+/pnpm-lock.yaml
+
+# Yarn PnP / Yarn 4 Artefakte ignorieren
+.pnp.cjs
+.pnp.loader.mjs
+.yarn/
 install-state.gz
+
+# Secrets / env
+.env
+*.env
+secrets/*.pem
+!secrets/README.md
+
