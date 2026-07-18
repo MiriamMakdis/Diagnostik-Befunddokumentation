@@ -14,6 +14,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scarf/scarf@npm:=1.4.0":
+  version: 1.4.0
+  resolution: "@scarf/scarf@npm:1.4.0"
+  checksum: 10c0/332118bb488e7a70eaad068fb1a33f016d30442fb0498b37a80cb425c1e741853a5de1a04dce03526ed6265481ecf744aa6e13f072178d19e6b94b19f623ae1c
+  languageName: node
+  linkType: hard
+
 "abbrev@npm:^5.0.0":
   version: 5.0.0
   resolution: "abbrev@npm:5.0.0"
@@ -63,6 +70,7 @@ __metadata:
     express: "npm:^5.2.1"
     jsonwebtoken: "npm:^9.0.3"
     nodemon: "npm:^3.1.14"
+    swagger-ui-dist: "npm:^5.32.9"
     zod: "npm:^4.4.3"
   languageName: unknown
   linkType: soft
@@ -1087,6 +1095,15 @@ __metadata:
   dependencies:
     has-flag: "npm:^3.0.0"
   checksum: 10c0/6ae5ff319bfbb021f8a86da8ea1f8db52fac8bd4d499492e30ec17095b58af11f0c55f8577390a749b1c4dde691b6a0315dab78f5f54c9b3d83f8fb5905c1c05
+  languageName: node
+  linkType: hard
+
+"swagger-ui-dist@npm:^5.32.9":
+  version: 5.32.9
+  resolution: "swagger-ui-dist@npm:5.32.9"
+  dependencies:
+    "@scarf/scarf": "npm:=1.4.0"
+  checksum: 10c0/1d69eb8bbff3d92e74370c3f397f31abda231599fe6acb9b8016ffc4af337891fecfc971cb6aa816df49e0e873f97d856dd75ea6da9502355cdd9d0faf532ebf
   languageName: node
   linkType: hard
 

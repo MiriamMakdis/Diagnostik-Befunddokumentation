@@ -2,7 +2,6 @@
 node_modules/
 
 # Root-Level Install-Artefakte ignorieren, falls jemand aus Versehen im Top-Level yarn/npm install ausführt
-/yarn.lock
 /package-lock.json
 /package-lock.json
 /npm-shrinkwrap.json
