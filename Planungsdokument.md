@@ -754,11 +754,6 @@ flowchart TB
         ProcessLoader ~~~ ErrorHandling
     end
 
-    subgraph L3[Validation Layer]
-        direction LR
-        Validator[Zod Validation Schemas<br/>Request Body, Params, Query]
-    end
-
     subgraph L4[Service Layer]
         direction LR
         Workflow[DiagnosticWorkflowService<br/>zentrale Workflow-Steuerung]
@@ -816,8 +811,7 @@ flowchart TB
     end
 
     L1 --> L2
-    L2 --> L3
-    L3 --> L4
+    L2 --> L4
     L4 --> L5
     L4 --> L6
     L6 --> L7
