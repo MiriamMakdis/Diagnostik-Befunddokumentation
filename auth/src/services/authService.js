@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import jwt from 'jsonwebtoken';
-import { demoUsers } from '../users/demoUsers';
+import demoUsers from '../users/demoUsers.js';
 
 const getPrivateKey = () => {
   const privateKeyPath = process.env.JWT_PRIVATE_KEY_PATH;

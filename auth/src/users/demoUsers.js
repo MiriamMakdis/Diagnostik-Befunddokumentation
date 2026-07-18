@@ -1,4 +1,4 @@
-export const demoUsers = [
+const demoUsers = [
     {
       sub: 'user-pflege-1',
       username: 'pflege',
@@ -67,3 +67,5 @@ export const demoUsers = [
       ]
     }
   ];
+
+export default demoUsers;

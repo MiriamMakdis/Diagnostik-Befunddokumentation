@@ -1,5 +1,5 @@
 import express from 'express';
-import { authApi } from './api/authApi.js';
+import authApi from './api/authApi.js';
 
 export const app = express();
 
@@ -12,4 +12,4 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.use('/api/auth', authApi);
+app.use('/api/v1/auth', authApi);
