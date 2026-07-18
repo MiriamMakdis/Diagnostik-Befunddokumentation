@@ -731,6 +731,100 @@ Weitere dependencies:
 
 Die Implementierung wird in Schichten aufgeteilt.
 
+```mermaid
+flowchart TB
+    subgraph L1[API Layer]
+        Router[Express Router]
+        ApiModules[API Modules<br/>authApi, patientsApi,<br/>diagnosticWorkflowsApi,<br/>radiologyApi, emergencyApi]
+
+        Router ~~~ ApiModules
+    end
+
+    subgraph L2[Middleware Layer]
+        direction LR
+        AuthMiddleware[requireAuth<br/>JWT prüfen]
+        ScopeMiddleware[requireScopes<br/>Scopes prüfen]
+        RequestValidation[validateRequest<br/>Zod-Validierung anwenden]
+        ProcessLoader[loadWorkflowProcess<br/>Prozess laden und Organisation prüfen]
+        ErrorHandling[errorHandler<br/>Fehlerantworten vereinheitlichen]
+
+        AuthMiddleware ~~~ ScopeMiddleware
+        ScopeMiddleware ~~~ RequestValidation
+        RequestValidation ~~~ ProcessLoader
+        ProcessLoader ~~~ ErrorHandling
+    end
+
+    subgraph L3[Validation Layer]
+        direction LR
+        Validator[Zod Validation Schemas<br/>Request Body, Params, Query]
+    end
+
+    subgraph L4[Service Layer]
+        direction LR
+        Workflow[DiagnosticWorkflowService<br/>zentrale Workflow-Steuerung]
+        Patient[PatientService<br/>Patientensuche / Patient anlegen]
+        Context[ContextService<br/>rollenabhängiger Kontext]
+        Worklist[WorklistService<br/>Radiologie- und Notaufnahme-Worklists]
+        Report[ReportService<br/>Befundzusammenfassung]
+        Audit[AuditService<br/>lokale Events + FHIR AuditEvent]
+        Provenance[ProvenanceService<br/>FHIR Provenance]
+
+        Workflow ~~~ Patient
+        Patient ~~~ Context
+        Context ~~~ Worklist
+        Worklist ~~~ Report
+        Report ~~~ Audit
+        Audit ~~~ Provenance
+    end
+
+    subgraph L5[FHIR Integration Layer]
+        direction LR
+        BundleBuilder[FHIR Bundle Builder<br/>Transaction Bundles]
+        ResourceBuilders[FHIR Resource Builder<br/>Patient, Encounter, Condition,<br/>MedicationStatement, Consent,<br/>ServiceRequest, ImagingStudy,<br/>Observation, DiagnosticReport]
+        FhirClient[FHIR Client<br/>HTTP-Kommunikation mit HAPI FHIR]
+
+        BundleBuilder ~~~ ResourceBuilders
+        ResourceBuilders ~~~ FhirClient
+    end
+
+    subgraph L6[Data Access Layer]
+        direction LR
+        ProcessStore[ProcessStore<br/>Workflowstatus + FHIR-Referenzen]
+        EventStore[EventLogStore<br/>technische Event-Logs]
+        ErrorStore[ErrorStore<br/>technische Fehler]
+
+        ProcessStore ~~~ EventStore
+        EventStore ~~~ ErrorStore
+    end
+
+    subgraph L7[Model Layer]
+        direction LR
+        ProcessModel[ProcessModel<br/>workflow_processes]
+        EventLogModel[EventLogModel<br/>event_logs]
+        ErrorModel[ErrorModel<br/>technical_errors]
+
+        ProcessModel ~~~ EventLogModel
+        EventLogModel ~~~ ErrorModel
+    end
+
+    subgraph External[Externe Systeme]
+        direction LR
+        Mongo[(MongoDB<br/>Prozessstatus, Events,<br/>Fehler, FHIR-Referenzen)]
+        HAPI[HAPI FHIR R4 Testserver<br/>medizinische FHIR-Ressourcen]
+
+        Mongo ~~~ HAPI
+    end
+
+    L1 --> L2
+    L2 --> L3
+    L3 --> L4
+    L4 --> L5
+    L4 --> L6
+    L6 --> L7
+    L7 --> Mongo
+    L5 --> HAPI
+```
+
 ### 13.1.1 API-Schicht
 
 Die API-Schicht definiert die Express-Router und Endpunkte. Diese nehmen Requests entgegen, verwenden Middleware und rufen Services auf. Die API-Schicht soll möglichst wenig Fachlogik enthalten. Sie ist vor allem für das HTTP handling zuständig. Für die Beschreibung der API-Endpunkte siehe den Abschnitt API-Endpunktplanung.
