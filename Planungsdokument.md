@@ -76,9 +76,10 @@ Die eigentlichen medizinischen Fachdaten, wie Patientendaten, Vorerkrankungen, M
 
 Das Ziel dieser Entscheidung ist, den Workflow trotzdem technisch durchführen und auditieren zu können, ohne medizinische Klartextdaten in unserer lokalen DB zu duplizieren. Dadurch wird das Risiko reduziert, dass sensible Patientendaten an mehreren Stellen geschützt werden müssen.
 
-```
+
 Der FHIR-Server speichert die eigentlichen medizinischen Ressourcen:
 
+```text
 * Patient,
 * Encounter,
 * Condition,
@@ -90,11 +91,13 @@ Der FHIR-Server speichert die eigentlichen medizinischen Ressourcen:
 * DiagnosticReport,
 * AuditEvent,
 * Provenance.
+```
 
 MongoDB speichert nur technische Informationen, die für Workflow-Steuerung und Nachvollziehbarkeit nötig sind.
 
 Zum Beispiel:
 
+```
 * `processId`,
 * `transactionId`,
 * aktueller Workflow-Status,
@@ -105,6 +108,7 @@ Zum Beispiel:
 * Fehlercodes,
 * HTTP-Statuscodes,
 * Zeitstempel.
+```
 
 Die KVNR wird nur zur Laufzeit benötigt, um im FHIR-Server nach Patientendaten zu suchen. Lokal speichern wir nur einen Hash, zum Beispiel:
 
