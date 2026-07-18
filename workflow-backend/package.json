@@ -23,8 +23,7 @@
   "homepage": "https://github.com/MiriamMakdis/Diagnostik-Befunddokumentation#readme",
   "dependencies": {
     "express": "^5.2.1",
-    "mongoose": "^9.7.4"
-  "dependencies": {
+    "mongoose": "^9.7.4",
     "uuid": "^14.0.1"
   }
 }
