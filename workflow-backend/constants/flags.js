@@ -1,0 +1,1 @@
+export const PROTECT_ROUTES=true
