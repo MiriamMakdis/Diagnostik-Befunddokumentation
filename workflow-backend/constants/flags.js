@@ -1,1 +1,5 @@
-export const PROTECT_ROUTES=true
+const Flags = Object.freeze({
+  PROTECT_ROUTES: true,
+});
+
+module.exports = Flags;
