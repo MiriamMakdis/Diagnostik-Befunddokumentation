@@ -1188,23 +1188,6 @@ Der Auth-Service erzeugt Tokens. Das Workflow-Backend prüft diese Tokens und f�
 
 ## Aufgabenverteilung 
 
-Witali Klein:
-  Auth-Service, Docker, Middleware und Workflow-Orchestrierung:
-  - Auth-Service als eigener Express-Service
-  - Demo-Benutzer mit Rollen und Scopes
-  - JWT-Erzeugung und JWT-Prüfung
-  - Script zum Erzeugen der JWT Keys
-  - Dockerfiles und docker-compose.yml
-  - Middlewares:
-      - requireAuth
-      - requireScopes
-      - validateRequest
-      - errorHandler
-      - loadWorkflowProcess
-  - DiagnosticWorkflowService
-  - Statuslogik und nextStepService
-  - Integration der einzelnen Teile am Ende
-    
 Amna Al-Sorani:
   MongoDB, Models, Stores und lokale Logs:
   - MongoDB-Verbindung mit Mongoose
@@ -1228,25 +1211,70 @@ Amna Al-Sorani:
  - lokale Event-Logs
  - lokale Fehlerlogs
 
- Malte, Maier:
-   API-Router, Validierung, OpenAPI und Demo-Requests:
-   - API-Router & Endpunkte:
-      - patientsApi.js
-      - diagnosticWorkflowsApi.js
-      - radiologyApi.js
-      - emergencyApi.js
-  - Zod-Validierung:
-      - patientValidation.js
-      - workflowValidation.js
-      - commonValidation.js
-  - Endpunkte verdrahten mit Middleware und Service-Aufrufen
-  - Swagger / OpenAPI-Datei ergänzen
-  - Beispielrequests für die Demo vorbereiten
-  - fachliche Endpunkte dokumentieren (Swagger UI), z. B.:
-      - Patientensuche
-      - Workflow starten
-      - Röntgenauftrag erstellen
-      - ImagingStudy registrieren
-      - Befund erstellen
-      - Worklists abrufen
-      - Report-Summary abrufen
+Witali Klein:
+  Auth-Service, Docker, Middlewares und Workflow-Orchestrierung:
+  - Auth-Service als eigener Express-Service
+  - Demo-Benutzer mit Rollen und Scopes
+  - JWT-Erzeugung und JWT-Prüfung
+  - Script zum Erzeugen der JWT Keys
+  - Dockerfiles und docker-compose.yml
+  - Middlewares:
+      - requireAuth
+      - requireScopes
+      - validateRequest
+      - errorHandler
+      - loadWorkflowProcess
+  - DiagnosticWorkflowService
+  - Statuslogik und nextStepService
+  - Integration der einzelnen Teile am Ende
+      
+  Myriam Makdis:
+    FHIR-Integration, Resource Builder und fachliche Hilfsservices:
+    - FHIR-Client:
+        - Verbindung zum HAPI FHIR R4 Testserver
+        - Ressourcen erstellen
+        - Ressourcen lesen
+        - Transaction Bundles senden
+    - FHIR-Resource-Builder für:
+        - Patient
+        - Encounter
+        - Condition
+        - MedicationStatement
+        - Consent
+        - ServiceRequest
+        - ImagingStudy
+        - Observation
+        - DiagnosticReport
+        - AuditEvent
+        - Provenance
+    - Bundle Builder für zusammengehörige FHIR-Ressourcen
+    - Hilfsservices:
+        - patientService
+        - contextService
+        - worklistService
+        - reportService
+        - auditService
+        - provenanceService
+
+  Malte, Maier:
+    API-Router, Validierung, OpenAPI und Demo-Requests:
+    - API-Router & Endpunkte:
+        - patientsApi.js
+        - diagnosticWorkflowsApi.js
+        - radiologyApi.js
+        - emergencyApi.js
+    - Zod-Validierung:
+        - patientValidation.js
+        - workflowValidation.js
+        - commonValidation.js
+    - Endpunkte verdrahten mit Middleware und Service-Aufrufen
+    - Swagger / OpenAPI-Datei ergänzen
+    - Beispielrequests für die Demo vorbereiten
+    - fachliche Endpunkte dokumentieren (Swagger UI), z. B.:
+        - Patientensuche
+        - Workflow starten
+        - Röntgenauftrag erstellen
+        - ImagingStudy registrieren
+        - Befund erstellen
+        - Worklists abrufen
+        - Report-Summary abrufen
