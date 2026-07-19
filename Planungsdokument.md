@@ -378,12 +378,6 @@ GET /api/diagnostic-workflows/{processId}/report-summary
 
 ---
 
-Ja, dafür würde ich einen kurzen Abschnitt nach dem **fachlichen Schnitt des Workflows** oder bei der **API-Endpunktplanung** einbauen. Inhaltlich passt er gut zwischen Workflow-Aufteilung und Fehlerbehandlung, weil die Statuswerte später für Endpunkte, Worklists und Fehlerfälle wichtig sind.
-
-So könntest du es formulieren:
-
----
-
 ## 8. Workflow-Status
 
 Damit der mehrstufige Prozess über mehrere API-Aufrufe hinweg gesteuert werden kann, braucht jeder Vorgang einen aktuellen Status. Dieser Status wird lokal in MongoDB beim Prozess gespeichert. Er beschreibt, an welcher Stelle sich der Workflow gerade befindet.
