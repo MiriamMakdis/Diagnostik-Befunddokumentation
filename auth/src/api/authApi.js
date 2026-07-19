@@ -80,6 +80,7 @@ router.get('/me', (req, res, next) => {
         sub: decoded.sub,
         username: decoded.username,
         displayName: decoded.displayName,
+        organizationId: decoded.organizationId,
         role: decoded.role,
         scopes: decoded.scopes
       }

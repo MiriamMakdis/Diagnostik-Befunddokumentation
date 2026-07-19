@@ -21,6 +21,7 @@ const buildTokenPayload = (user) => {
     sub: user.sub,
     username: user.username,
     displayName: user.displayName,
+    organizationId: user.organizationId,
     role: user.role,
     scopes: user.scopes
   };
@@ -54,6 +55,7 @@ export const login = ({ username, password }) => {
       sub: user.sub,
       username: user.username,
       displayName: user.displayName,
+      organizationId: user.organizationId,
       role: user.role,
       scopes: user.scopes
     }
@@ -64,6 +66,7 @@ export const getDemoUsers = () => {
   return demoUsers.map((user) => ({
     username: user.username,
     displayName: user.displayName,
+    organizationId: user.organizationId,
     role: user.role,
     scopes: user.scopes
   }));

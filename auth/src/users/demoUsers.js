@@ -4,7 +4,7 @@ const demoUsers = [
       username: 'pflege',
       password: 'demo',
       role: 'ER_NURSE',
-      
+      organizationId: 'hospital-demo-1',
       scopes: [
         'patient:search',
         'intake:create',
@@ -17,7 +17,7 @@ const demoUsers = [
       username: 'arzt',
       password: 'demo',
       role: 'ER_DOCTOR',
-      
+      organizationId: 'hospital-demo-1',
       scopes: [
         'patient:search',
         'workflow:read',
@@ -32,7 +32,7 @@ const demoUsers = [
       username: 'radiologie',
       password: 'demo',
       role: 'RAD_TECH',
-      
+      organizationId: 'hospital-demo-1',
       scopes: [
         'workflow:read',
         'context:read',
@@ -45,7 +45,7 @@ const demoUsers = [
       username: 'radiologe',
       password: 'demo',
       role: 'RADIOLOGIST',
-      
+      organizationId: 'hospital-demo-1',
       scopes: [
         'workflow:read',
         'context:read',
@@ -59,7 +59,7 @@ const demoUsers = [
       username: 'auditor',
       password: 'demo',
       role: 'AUDITOR',
-      
+      organizationId: 'hospital-demo-1',
       scopes: [
         'workflow:read',
         'audit:read',
@@ -68,4 +68,4 @@ const demoUsers = [
     }
   ];
 
-export default demoUsers;
+  export default demoUsers;

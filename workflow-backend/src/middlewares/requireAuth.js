@@ -1,16 +1,18 @@
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const { PROTECT_ROUTES } = require("../../constants/flags");
+const createAppError = require("../utils/createAppError");
+const ErrorCodes = require("../../constants/errorCodes");
 
 // public key schon beim module load laden statt bei jedem request
 
 const publicKeyPath = process.env.JWT_PUBLIC_KEY_PATH;
 
 if (!publicKeyPath) {
-  const error = new Error("JWT_PUBLIC_KEY_PATH ist nicht gesetzt.");
-  error.statusCode = 500;
-  error.errorCode = "JWT_PUBLIC_KEY_MISSING";
-  throw error;
+  throw createAppError({
+    errorCode: ErrorCodes.INTERNAL_SERVER_ERROR,
+    details: "JWT_PUBLIC_KEY_PATH ist nicht gesetzt."
+  });
 }
 
 const publicKey = fs.readFileSync(publicKeyPath, 'utf8');
@@ -52,6 +54,7 @@ const requireAuth = (req, res, next) => {
       sub: decoded.sub,
       username: decoded.username,
       displayName: decoded.displayName,
+      organizationId: decoded.organizationId,
       role: decoded.role,
       scopes: decoded.scopes || [],
     };
