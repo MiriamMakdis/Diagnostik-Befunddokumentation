@@ -1231,50 +1231,50 @@ Der Auth-Service erzeugt Tokens. Das Workflow-Backend prüft diese Tokens und f�
 <ins>**Myriam Makdis**</ins>:  
   FHIR-Integration, Resource Builder und fachliche Hilfsservices:
   - FHIR-Client:
-        - Verbindung zum HAPI FHIR R4 Testserver
-        - Ressourcen erstellen
-        - Ressourcen lesen
-        - Transaction Bundles senden
-    - FHIR-Resource-Builder für:
-        - Patient
-        - Encounter
-        - Condition
-        - MedicationStatement
-        - Consent
-        - ServiceRequest
-        - ImagingStudy
-        - Observation
-        - DiagnosticReport
-        - AuditEvent
-        - Provenance
-    - Bundle Builder für zusammengehörige FHIR-Ressourcen
-    - Hilfsservices:
-        - patientService
-        - contextService
-        - worklistService
-        - reportService
-        - auditService
-        - provenanceService
+    - Verbindung zum HAPI FHIR R4 Testserver
+    - Ressourcen erstellen
+    - Ressourcen lesen
+    - Transaction Bundles senden
+  - FHIR-Resource-Builder für:
+    - Patient
+    - Encounter
+    - Condition
+    - MedicationStatement
+    - Consent
+    - ServiceRequest
+    - ImagingStudy
+    - Observation
+    - DiagnosticReport
+    - AuditEvent
+    - Provenance
+  - Bundle Builder für zusammengehörige FHIR-Ressourcen
+  - Hilfsservices:
+    - patientService
+    - contextService
+    - worklistService
+    - reportService
+    - auditService
+    - provenanceService
 
 <ins>**Malte, Maier**</ins>:  
 API-Router, Validierung, OpenAPI und Demo-Requests:
   - API-Router & Endpunkte:
-        - patientsApi.js
-        - diagnosticWorkflowsApi.js
-        - radiologyApi.js
-        - emergencyApi.js
-    - Zod-Validierung:
-        - patientValidation.js
-        - workflowValidation.js
-        - commonValidation.js
-    - Endpunkte verdrahten mit Middleware und Service-Aufrufen
-    - Swagger / OpenAPI-Datei ergänzen
-    - Beispielrequests für die Demo vorbereiten
-    - fachliche Endpunkte dokumentieren (Swagger UI), z. B.:
-        - Patientensuche
-        - Workflow starten
-        - Röntgenauftrag erstellen
-        - ImagingStudy registrieren
-        - Befund erstellen
-        - Worklists abrufen
-        - Report-Summary abrufen
+    - patientsApi.js
+    - diagnosticWorkflowsApi.js
+    - radiologyApi.js
+    - emergencyApi.js
+  - Zod-Validierung:
+    - patientValidation.js
+    - workflowValidation.js
+    - commonValidation.js
+  - Endpunkte verdrahten mit Middleware und Service-Aufrufen
+  - Swagger / OpenAPI-Datei ergänzen
+  - Beispielrequests für die Demo vorbereiten
+  - fachliche Endpunkte dokumentieren (Swagger UI), z. B.:
+    - Patientensuche
+    - Workflow starten
+    - Röntgenauftrag erstellen
+    - ImagingStudy registrieren
+    - Befund erstellen
+    - Worklists abrufen
+    - Report-Summary abrufen
