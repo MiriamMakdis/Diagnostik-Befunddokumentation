@@ -1,8 +1,8 @@
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
-const { PROTECT_ROUTES } = require("../../constants/flags");
+const { PROTECT_ROUTES } = require("../constants/flags");
 const createAppError = require("../utils/createAppError");
-const ErrorCodes = require("../../constants/errorCodes");
+const ErrorCodes = require("../constants/errorCodes");
 
 // public key schon beim module load laden statt bei jedem request
 

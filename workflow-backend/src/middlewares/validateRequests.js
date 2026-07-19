@@ -1,6 +1,6 @@
-const ErrorCodes = require("../../constants/errorCodes");
-const { getHttpStatusForErrorCode } = require("../../constants/errorHttpStatus");
-const WorkflowStatus = require("../../constants/workflowStatus");
+const ErrorCodes = require("../constants/errorCodes");
+const { getHttpStatusForErrorCode } = require("../constants/errorHttpStatus");
+const WorkflowStatus = require("../constants/workflowStatus");
 
 const validateRequest = (schemas) => {
     return (req, res, next) => {
