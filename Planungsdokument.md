@@ -1188,14 +1188,42 @@ Der Auth-Service erzeugt Tokens. Das Workflow-Backend prüft diese Tokens und f�
 
 ## Aufgabenverteilung 
 
-Witali:
+Witali Klein:
   Auth-Service, Docker, Middleware und Workflow-Orchestrierung:
   - Auth-Service als eigener Express-Service
   - Demo-Benutzer mit Rollen und Scopes
   - JWT-Erzeugung und JWT-Prüfung
   - Script zum Erzeugen der JWT Keys
   - Dockerfiles und docker-compose.yml
-  - Middlewares
+  - Middlewares:
+      - requireAuth
+      - requireScopes
+      - validateRequest
+      - errorHandler
+      - loadWorkflowProcess
   - DiagnosticWorkflowService
   - Statuslogik und nextStepService
   - Integration der einzelnen Teile am Ende
+    
+Amna Al-Sorani:
+  MongoDB, Models, Stores und lokale Logs:
+  - MongoDB-Verbindung mit Mongoose
+  - Models:
+      - processModel.js
+      - eventLogModel.js
+      - errorModel.js
+  - Data-Access-Stores:
+      - processStore.js
+      - eventLogStore.js
+      - errorStore.js
+  - Store-Funktionen wie:
+      - createProcess
+      - findProcessById
+      - updateProcessStatus
+      - addFhirReferences
+      - listProcessesByStatus
+      - saveEventLog
+      - listEventLogsByProcessId
+      - saveTechnicalError
+ - lokale Event-Logs
+ - lokale Fehlerlogs
