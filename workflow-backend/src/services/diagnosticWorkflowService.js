@@ -4,8 +4,8 @@ const createAppError = require('../utils/createAppError');
 
 const { updateProcessStatus } = require('../dataAccess/processStore');
 const { saveError } = require('../dataAccess/errorStore');
-const { getHttpStatusForErrorCode } = require('../../constants/errorHttpStatus');
-const { getMessageForErrorCode } = require('../../constants/errorMessages');
+const { getHttpStatusForErrorCode } = require('../constants/errorHttpStatus');
+const { getMessageForErrorCode } = require('../constants/errorMessages');
 
 
 const saveTechnicalError = async ({
