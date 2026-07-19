@@ -1188,7 +1188,7 @@ Der Auth-Service erzeugt Tokens. Das Workflow-Backend pr√ºft diese Tokens und f√
 
 ## Aufgabenverteilung 
 
-Amna Al-Sorani:
+Amna Al-Sorani:  
   MongoDB, Models, Stores und lokale Logs:
   - MongoDB-Verbindung mit Mongoose
   - Models:
@@ -1211,7 +1211,7 @@ Amna Al-Sorani:
  - lokale Event-Logs
  - lokale Fehlerlogs
 
-Witali Klein:
+Witali Klein:  
   Auth-Service, Docker, Middlewares und Workflow-Orchestrierung:
   - Auth-Service als eigener Express-Service
   - Demo-Benutzer mit Rollen und Scopes
@@ -1228,9 +1228,9 @@ Witali Klein:
   - Statuslogik und nextStepService
   - Integration der einzelnen Teile am Ende
       
-  Myriam Makdis:
-    FHIR-Integration, Resource Builder und fachliche Hilfsservices:
-    - FHIR-Client:
+Myriam Makdis:  
+  FHIR-Integration, Resource Builder und fachliche Hilfsservices:
+  - FHIR-Client:
         - Verbindung zum HAPI FHIR R4 Testserver
         - Ressourcen erstellen
         - Ressourcen lesen
@@ -1256,9 +1256,9 @@ Witali Klein:
         - auditService
         - provenanceService
 
-  Malte, Maier:
-    API-Router, Validierung, OpenAPI und Demo-Requests:
-    - API-Router & Endpunkte:
+Malte, Maier:  
+API-Router, Validierung, OpenAPI und Demo-Requests:
+  - API-Router & Endpunkte:
         - patientsApi.js
         - diagnosticWorkflowsApi.js
         - radiologyApi.js
