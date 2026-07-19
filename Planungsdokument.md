@@ -1185,3 +1185,17 @@ Die Container kommunizieren intern über das Docker-Netzwerk. Der HAPI FHIR R4 T
 Der Auth-Service erzeugt Tokens. Das Workflow-Backend prüft diese Tokens und führt die fachlichen Aktionen aus.
 
 ---
+
+## Aufgabenverteilung 
+
+Witali:
+  Auth-Service, Docker, Middleware und Workflow-Orchestrierung:
+  - Auth-Service als eigener Express-Service
+  - Demo-Benutzer mit Rollen und Scopes
+  - JWT-Erzeugung und JWT-Prüfung
+  - Script zum Erzeugen der JWT Keys
+  - Dockerfiles und docker-compose.yml
+  - Middlewares
+  - DiagnosticWorkflowService
+  - Statuslogik und nextStepService
+  - Integration der einzelnen Teile am Ende
