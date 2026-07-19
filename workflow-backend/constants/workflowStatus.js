@@ -1,0 +1,9 @@
+const workflowStatus = Object.freeze({
+    INTAKE_COMPLETED: 'INTAKE_COMPLETED',
+    RADIOLOGY_ORDER_CREATED: 'RADIOLOGY_ORDER_CREATED',
+    IMAGING_STUDY_REGISTERED: 'IMAGING_STUDY_REGISTERED',
+    SUCCESS: 'SUCCESS',
+    ERROR: 'ERROR'
+  });
+  
+  module.exports = workflowStatus;
