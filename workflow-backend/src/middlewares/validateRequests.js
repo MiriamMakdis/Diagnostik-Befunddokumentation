@@ -1,3 +1,7 @@
+const ErrorCodes = require("../../constants/errorCodes");
+const { getHttpStatusForErrorCode } = require("../../constants/errorHttpStatus");
+const WorkflowStatus = require("../../constants/workflowStatus");
+
 const validateRequest = (schemas) => {
     return (req, res, next) => {
       try {
@@ -15,10 +19,11 @@ const validateRequest = (schemas) => {
   
         return next();
       } catch (error) {
-        return res.status(400).json({
-          status: 'ERROR',
-          errorCode: 'VALIDATION_ERROR',
-          message: 'Der Request enthält ungültige oder unvollständige Daten.',
+        const httpStatus = getHttpStatusForErrorCode(ErrorCodes.VALIDATION_ERROR);
+        return res.status(httpStatus).json({
+          status: WorkflowStatus.ERROR,
+          errorCode: ErrorCodes.VALIDATION_ERROR,
+          message: getMessageForErrorCode(ErrorCodes.VALIDATION_ERROR),
           details: error.errors?.map((validationError) => ({
             path: validationError.path.join('.'),
             message: validationError.message
