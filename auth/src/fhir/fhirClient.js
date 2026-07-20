@@ -8,7 +8,7 @@ const fhirAxios = axios.create({
     'Content-Type': 'application/fhir+json',
     'Accept': 'application/fhir+json'
   },
-  // timeout: 10000
+  // timeout: 10000yarn
 });
 
 // FHIR Operaton Outcome
