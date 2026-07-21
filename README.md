@@ -72,7 +72,7 @@ Diagnostik-Befunddokumentation/
 
 | Benutzername | Passwort | Rolle |
 |-------------|----------|-------|
-| `mfa` | `demo` | Pflege (ER_NURSE) |
+| `pflege` | `demo` | Pflege (ER_NURSE) |
 | `arzt` | `demo` | Arzt (ER_DOCTOR) |
 | `radiologie` | `demo` | Radiologie-Tech (RAD_TECH) |
 | `radiologe` | `demo` | Radiologe (RADIOLOGIST) |
