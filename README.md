@@ -49,7 +49,7 @@ Diagnostik-Befunddokumentation/
 │       ├── models/
 │       ├── stores/
 │       ├── services/
-│       └── patient/
+│       └── routes/
 ├── docker-compose.yml
 ├── Planungsdokument.md
 └── README.md
