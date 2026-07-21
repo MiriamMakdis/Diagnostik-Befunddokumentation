@@ -12,7 +12,7 @@ const searchPatient = async ({ family, given, birthdate, identifier }) => {
   if (birthdate) searchParams.birthdate = birthdate;
   if (identifier) searchParams.identifier = identifier;
 
-  const bundle = await fhirClient.searchFhirResources('Patient', searchParams);
+  const bundle = await fhirClient.searchFhirResource('Patient', searchParams);
   return bundleToResources(bundle);
 };
 

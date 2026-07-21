@@ -4,15 +4,17 @@
  * @returns {Object} FHIR Bundle Resource (Type: transaction)
  */
 
-export const buildTransactionBundle = (resources) => {
+const buildTransactionBundle = (resources) => {
   const entries = resources.map(resource => {
     if (!resource.id) {
       throw new Error(`Ressource vom Typ ${resource.resourceType} besitzt keine (temporäre) ID. Bundling abgebrochen.`);
     }
 
+    const { recourceId, ...resourceWithoutTemporaryId } = resource;
+
     return {
-      fullUrl: resource.id,
-      resource: resource,
+      fullUrl: recourceId,
+      resource: resourceWithoutTemporaryId,
       request: {
         method: 'POST',
         url: resource.resourceType
@@ -27,6 +29,6 @@ export const buildTransactionBundle = (resources) => {
   };
 };
 
-export default {
+module.exports = {
   buildTransactionBundle
 };

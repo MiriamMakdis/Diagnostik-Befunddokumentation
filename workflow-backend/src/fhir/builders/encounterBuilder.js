@@ -7,7 +7,7 @@
  * @param {string} [data.status] - Status des Falls ('planned', 'arrived', 'triaged', 'in-progress', 'finished')
  * @returns {Object} FHIR Encounter Resource
  */
-export const buildEncounterResource = (data) => {
+const buildEncounterResource = (data) => {
   const { id, patientRef, startTime, status = 'in-progress' } = data;
 
   return {
@@ -26,4 +26,8 @@ export const buildEncounterResource = (data) => {
       start: startTime
     }
   };
+};
+
+module.exports = {
+  buildEncounterResource
 };

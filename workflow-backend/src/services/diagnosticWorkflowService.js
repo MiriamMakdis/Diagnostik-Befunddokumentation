@@ -162,43 +162,6 @@ const ensureRequiredFhirRefs = (process, requiredKeys) => {
   }
 };
 
-const mergeFhirRefs = (oldRefs = {}, newRefs = {}) => {
-  return {
-    ...oldRefs,
-    ...newRefs,
-
-    conditionRefs: [
-      ...(oldRefs.conditionRefs || []),
-      ...(newRefs.conditionRefs || []),
-    ],
-
-    medicationStatementRefs: [
-      ...(oldRefs.medicationStatementRefs || []),
-      ...(newRefs.medicationStatementRefs || []),
-    ],
-
-    observationRefs: [
-      ...(oldRefs.observationRefs || []),
-      ...(newRefs.observationRefs || []),
-    ],
-
-    auditEventRefs: [
-      ...(oldRefs.auditEventRefs || []),
-      ...(newRefs.auditEventRefs || []),
-    ],
-
-    provenanceRefs: [
-      ...(oldRefs.provenanceRefs || []),
-      ...(newRefs.provenanceRefs || []),
-    ],
-  };
-};
-
-const addMergedFhirReferences = async (process, newRefs) => {
-  const mergedRefs = mergeFhirRefs(process.fhirRefs || {}, newRefs);
-
-  return addFhirReferences(process.processId, mergedRefs);
-};
 
 const createFhirResourceAndRef = async (resourceType, resource) => {
   try {
@@ -518,7 +481,7 @@ const startDiagnosticWorkflow = async ({ user, input }) => {
     });
 
     if (auditEventRef) {
-      process = await addMergedFhirReferences(process, {
+      process = await addFhirReferences(process.processId, {
         auditEventRefs: [auditEventRef],
       });
     }
@@ -641,7 +604,7 @@ const createRadiologyOrder = async ({ user, process, processId, input }) => {
       activityDisplay: "Röntgenauftrag erstellt",
     });
 
-    currentProcess = await addMergedFhirReferences(currentProcess, {
+    currentProcess = await addFhirReferences(currentProcess.processId, {
       serviceRequestRef: createdServiceRequest.reference,
       provenanceRefs: [provenanceRef],
     });
@@ -659,7 +622,7 @@ const createRadiologyOrder = async ({ user, process, processId, input }) => {
     });
 
     if (auditEventRef) {
-      currentProcess = await addMergedFhirReferences(currentProcess, {
+      currentProcess = await addFhirReferences(currentProcess.processId, {
         auditEventRefs: [auditEventRef],
       });
     }
@@ -752,7 +715,7 @@ const registerImagingStudy = async ({ user, process, processId, input }) => {
       activityDisplay: "ImagingStudy registriert",
     });
 
-    currentProcess = await addMergedFhirReferences(currentProcess, {
+    currentProcess = await addFhirReferences(currentProcess.processId, {
       imagingStudyRef: createdImagingStudy.reference,
       provenanceRefs: [provenanceRef],
     });
@@ -770,7 +733,7 @@ const registerImagingStudy = async ({ user, process, processId, input }) => {
     });
 
     if (auditEventRef) {
-      currentProcess = await addMergedFhirReferences(currentProcess, {
+      currentProcess = await addFhirReferences(currentProcess.processId, {
         auditEventRefs: [auditEventRef],
       });
     }
@@ -884,7 +847,7 @@ const createDiagnosticReport = async ({ user, process, processId, input }) => {
       activityDisplay: "Radiologischer Befund erstellt",
     });
 
-    currentProcess = await addMergedFhirReferences(currentProcess, {
+    currentProcess = await addFhirReferences(currentProcess.processId, {
       observationRefs,
       diagnosticReportRef: createdDiagnosticReport.reference,
       provenanceRefs: [provenanceRef],
@@ -903,7 +866,7 @@ const createDiagnosticReport = async ({ user, process, processId, input }) => {
     });
 
     if (auditEventRef) {
-      currentProcess = await addMergedFhirReferences(currentProcess, {
+      currentProcess = await addFhirReferences(currentProcess.processId, {
         auditEventRefs: [auditEventRef],
       });
     }
