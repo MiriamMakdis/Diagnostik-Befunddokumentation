@@ -176,7 +176,7 @@ Token als `<pflege-token>` verwenden.
 ### Schritt 2: Optional Patient suchen
 
 ```http
-POST http://localhost:3000/api/v1/patients/search
+POST http://localhost:3000/api/patients/search
 Authorization: Bearer <pflege-token>
 Content-Type: application/json
 ```
@@ -192,7 +192,7 @@ Dieser Endpunkt sucht nur im FHIR-Server. Er erstellt keinen Patienten und start
 ### Schritt 3: Workflow starten
 
 ```http
-POST http://localhost:3000/api/v1/diagnostic-workflows
+POST http://localhost:3000/api/diagnostic-workflows
 Authorization: Bearer <pflege-token>
 Content-Type: application/json
 ```
@@ -253,7 +253,7 @@ Token als `<arzt-token>` verwenden.
 ### Schritt 5: Röntgenauftrag erstellen
 
 ```http
-POST http://localhost:3000/api/v1/diagnostic-workflows/<processId>/radiology-orders
+POST http://localhost:3000/api/diagnostic-workflows/<processId>/radiology-orders
 Authorization: Bearer <arzt-token>
 Content-Type: application/json
 ```
@@ -294,7 +294,7 @@ Token als `<radiologie-token>` verwenden.
 ### Schritt 7: Radiologie-Worklist prüfen
 
 ```http
-GET http://localhost:3000/api/v1/radiology/worklist
+GET http://localhost:3000/api/radiology/worklist
 Authorization: Bearer <radiologie-token>
 ```
 
@@ -303,7 +303,7 @@ Der Prozess sollte mit Status `RADIOLOGY_ORDER_CREATED` sichtbar sein.
 ### Schritt 8: ImagingStudy registrieren
 
 ```http
-POST http://localhost:3000/api/v1/diagnostic-workflows/<processId>/imaging-studies
+POST http://localhost:3000/api/diagnostic-workflows/<processId>/imaging-studies
 Authorization: Bearer <radiologie-token>
 Content-Type: application/json
 ```
@@ -343,7 +343,7 @@ Token als `<radiologe-token>` verwenden.
 ### Schritt 10: Befund erstellen
 
 ```http
-POST http://localhost:3000/api/v1/diagnostic-workflows/<processId>/diagnostic-reports
+POST http://localhost:3000/api/diagnostic-workflows/<processId>/diagnostic-reports
 Authorization: Bearer <radiologe-token>
 Content-Type: application/json
 ```
@@ -384,28 +384,28 @@ Der Workflow ist damit abgeschlossen.
 Befund als Arzt lesen:
 
 ```http
-GET http://localhost:3000/api/v1/diagnostic-workflows/<processId>/report-summary
+GET http://localhost:3000/api/diagnostic-workflows/<processId>/report-summary
 Authorization: Bearer <arzt-token>
 ```
 
 Notaufnahme-Worklist prüfen:
 
 ```http
-GET http://localhost:3000/api/v1/emergency/worklist
+GET http://localhost:3000/api/emergency/worklist
 Authorization: Bearer <arzt-token>
 ```
 
 Events als Auditor prüfen:
 
 ```http
-GET http://localhost:3000/api/v1/diagnostic-workflows/<processId>/events
+GET http://localhost:3000/api/diagnostic-workflows/<processId>/events
 Authorization: Bearer <auditor-token>
 ```
 
 FHIR-Referenzen als Auditor prüfen:
 
 ```http
-GET http://localhost:3000/api/v1/diagnostic-workflows/<processId>/fhir-references
+GET http://localhost:3000/api/diagnostic-workflows/<processId>/fhir-references
 Authorization: Bearer <auditor-token>
 ```
 
