@@ -9,7 +9,7 @@
  * @returns {Object} FHIR ServiceRequest Resource
  */
 
-export const buildServiceRequestResource = (data) => {
+const buildServiceRequestResource = (data) => {
   const { id, patientRef, encounterRef, orderCode, orderDisplay } = data;
 
   return {
@@ -46,4 +46,8 @@ export const buildServiceRequestResource = (data) => {
     },
     authoredOn: new Date().toISOString()
   };
+};
+
+module.exports = {
+  buildServiceRequestResource
 };

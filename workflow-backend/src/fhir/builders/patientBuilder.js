@@ -11,7 +11,7 @@
  */
 
 
-export const buildPatientResource = (data) => {
+const buildPatientResource = (data) => {
     const { id, kvnr, lastName, firstName, birchDate, gender } = data;
 
     return {
@@ -20,7 +20,7 @@ export const buildPatientResource = (data) => {
     active: true,
     identifier: [
       {
-        system: 'http://fhir.de/NamingSystem/gkv/kvnr',
+        system: 'http://fhir.de/sid/gkv/kvid-10',
         value: kvnr,
         assigner: {
           display: 'GKV Spitzenverband'
@@ -37,4 +37,8 @@ export const buildPatientResource = (data) => {
     gender: gender || 'unknown',
     birthDate:data.birthDate
   };
+};
+
+module.exports = {
+  buildPatientResource,
 };

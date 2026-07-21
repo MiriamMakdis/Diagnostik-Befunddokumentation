@@ -1,4 +1,4 @@
-import axios from 'axios'
+ const axios = require('axios');
 
 const FHIR_BASE_URL = 'https://hapi.fhir.org/baseR4';
 
@@ -26,7 +26,7 @@ const handleFhirError = (error, contextMessage) => {
 * @returns {Promise<Object>} Die vom Server zurückgegebene Ressource (inkl. ID)
 */
 
-export const createFhirResource = async (resourceType, resourceData) => {
+const createFhirResource = async (resourceType, resourceData) => {
   try {
     const response = await fhirAxios.post(`/${resourceType}`, resourceData);
     return response.data;
@@ -41,12 +41,20 @@ export const createFhirResource = async (resourceType, resourceData) => {
 * @returns {Promise<Object>} Die FHIR-Ressource
  */
 
-export const readFhirResource = async (resourceType, id) => {
+const readFhirResource = async (resourceTypeOrReference, id) => {
   try {
-    const response = await fhirAxios.get(`/${resourceType}/${id}`);
+    const path = id
+      ? `/${resourceTypeOrReference}/${id}`
+      : `/${resourceTypeOrReference}`;
+
+    const response = await fhirAxios.get(path);
     return response.data;
   } catch (error) {
-    handleFhirError(error, `Fehler beim Lesen von ${resourceType}/${id}`);
+    const label = id
+      ? `${resourceTypeOrReference}/${id}`
+      : resourceTypeOrReference;
+
+    handleFhirError(error, `Fehler beim Lesen von ${label}`);
   }
 };
 
@@ -55,7 +63,7 @@ export const readFhirResource = async (resourceType, id) => {
  * @returns {Promise<Object>} Das Bundle-Response-Ergebnis vom Server
  */ 
 
-export const sendTransactionBundle = async (bundleData) => {
+const sendTransactionBundle = async (bundleData) => {
   try {
     const response = await fhirAxios.post('/', bundleData);
     return response.data;
@@ -64,8 +72,21 @@ export const sendTransactionBundle = async (bundleData) => {
   }
 };
 
-export default {
+const searchFhirResource = async (resourceType, searchParams = {}) => {
+  try {
+    const response = await fhirAxios.get(`/${resourceType}`, {
+      params: searchParams
+    });
+
+    return response.data;
+  } catch (error) {
+    handleFhirError(error, `Fehler beim Suchen von ${resourceType}`);
+  }
+};
+
+module.exports = { 
   createFhirResource,
   readFhirResource,
-  sendTransactionBundle
-};
+  sendTransactionBundle,
+  searchFhirResource
+ };

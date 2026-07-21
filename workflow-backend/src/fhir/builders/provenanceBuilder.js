@@ -8,7 +8,7 @@
  */
 
 // Audit Trail
-export const buildProvenanceResource = (data) => {
+const buildProvenanceResource = (data) => {
   const { id, targetRefs, agentDisplay } = data;
 
   return {
@@ -42,4 +42,8 @@ export const buildProvenanceResource = (data) => {
       }
     ]
   };
+};
+
+module.exports = {
+  buildProvenanceResource
 };
