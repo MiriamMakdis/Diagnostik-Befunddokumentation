@@ -23,7 +23,11 @@ router.post('/',
       loadWorkflowProcess,
       async (req, res, next) => {
         try {
-            startDiagnosticWorkflow();
+            startDiagnosticWorkflow({
+            processId: req.process.processId,
+            status: req.process.status,
+            fhirRefs: req.process.fhirRefs,
+            });
         } catch (err) {
           next(error);
         }
@@ -39,7 +43,11 @@ router.post('/:id/radiology-orders',
       async (req, res, next) => {
         req.params.id
         try {
-            createRadiologyOrder();
+            createRadiologyOrder({
+            processId: req.process.processId,
+            status: req.process.status,
+            fhirRefs: req.process.fhirRefs,
+            });
         } catch (err) {
           next(error);
         }
@@ -55,7 +63,11 @@ router.post('/:id/imaging-studies',
       async (req, res, next) => {
         req.params.id
         try {
-            registerImagingStudy();
+            registerImagingStudy({
+            processId: req.process.processId,
+            status: req.process.status,
+            fhirRefs: req.process.fhirRefs,
+            });
         } catch (err) {
           next(error);
         }

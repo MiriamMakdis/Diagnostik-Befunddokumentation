@@ -18,7 +18,7 @@ router.get('/',(req,res)=>{
     res.send("Hello")    
 })
 
-// POST /patient/aufnahme
+// POST /patient/search
 router.post('/search',
       requireAuth,
       requireScopes(Scopes.PATIENT_SEARCH),
