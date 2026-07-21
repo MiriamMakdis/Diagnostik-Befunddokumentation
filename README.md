@@ -1,159 +1,78 @@
 # Diagnostik-Befunddokumentation
-# Planungsdokument – Slice A: Diagnostik & Befunddokumentation
 
 ## Gruppe
-- Myriam Makdis
-- Malte
+- Myriam Makdis Antoun
+- Malte Maier
 - Amna Al-Sorani
-- Witalik
+- Witali Klein
 
 ## GitHub Repository
 https://github.com/MiriamMakdis/Diagnostik-Befunddokumentation
 
 ---
 
-## 1. Projektbeschreibung
+## Projekt starten
 
-Dieses Projekt implementiert **Slice A – Diagnostik & Befunddokumentation** im Rahmen der Gruppenarbeit für den Kurs B90G Medizinische Informationssysteme.
+### Voraussetzungen
+- Docker Desktop installiert
 
-**Szenario:** Ein Patient kommt in die Notaufnahme mit einem Verdacht auf Armfraktur. Ein Röntgenbild wird angeordnet, durchgeführt und der Befund wird dokumentiert und dem Behandlungsfall (Encounter) zugeordnet.
+### Start
+```bash
+docker compose up --build
+```
 
-**Rolle im System:** Radiologie-Modul / Schnittstelle zum PACS
+Das startet automatisch:
+- **MongoDB** auf Port 27017
+- **Auth-Service** auf Port 4000
+- **Workflow-Backend** auf Port 3000
 
----
-
-## 2. Systemarchitektur
-
-### Überblick
-Client (Postman / Browser)
-↓
-Express.js REST API (Port 3000)
-↓ ↓
-HAPI FHIR R4 MongoDB
-Testserver (lokal)
-
-### Komponenten
-
-| Komponente | Technologie | Zweck |
-|------------|-------------|-------|
-| REST API | Node.js + Express | HTTP-Endpunkte für alle Vorgänge |
-| FHIR-Client | fetch (Node.js built-in) | Kommunikation mit HAPI FHIR R4 Testserver |
-| Datenbank | MongoDB + Mongoose | Lokale Persistenz der Patientendaten |
-| FHIR-Server | https://hapi.fhir.org/baseR4 | Öffentlicher FHIR R4 Testserver |
+### Testen
+- Backend: http://localhost:3000
+- Auth-Service: http://localhost:4000/api/auth/login
+- Swagger: http://localhost:4000/docs
 
 ---
 
-## 3. Projektstruktur
+## Projektstruktur
+```
 Diagnostik-Befunddokumentation/
-├── src/
-│   ├── patient/
-│   │   ├── patient.schema.js      # Mongoose Schema für Patienten
-│   │   ├── patient.service.js     # FHIR-Aufrufe für Patient
-│   │   └── patient.routes.js      # HTTP-Endpunkte für Patient
-│   ├── audit/
-│   │   ├── auditEvent.schema.js   # Mongoose Schema für AuditEvents
-│   │   └── audit.service.js       # FHIR-Aufrufe für AuditEvent
-│   └── db.js                      # MongoDB Verbindung
-├── server.js                      # Express Server Einstiegspunkt
-├── PLANNING.md                    # Dieses Dokument
-└── package.json
+├── auth/                          # Auth-Service (JWT, Rollen)
+│   └── src/
+│       ├── api/authApi.js
+│       ├── services/authService.js
+│       └── users/demoUsers.js
+├── workflow-backend/              # Haupt-Backend
+│   └── src/
+│       ├── config/database.js
+│       ├── constants/
+│       ├── middlewares/
+│       ├── models/
+│       ├── stores/
+│       ├── services/
+│       └── patient/
+├── docker-compose.yml
+├── Planungsdokument.md
+└── README.md
+```
 
+----
 
----
+## Demo-Benutzer
 
-## 4. FHIR-Ressourcen
-
-Folgende FHIR R4 Ressourcen werden verwendet:
-
-| Ressource | Endpunkt | Zweck |
-|-----------|----------|-------|
-| Patient | `GET /Patient?family=...` | Patient per Name/KVID suchen |
-| Patient | `POST /Patient` | Neuen Patient anlegen |
-| ServiceRequest | `POST /ServiceRequest` | Bildgebungsauftrag (Röntgen) erstellen |
-| ImagingStudy | `POST /ImagingStudy` | Referenz auf Bilddaten anlegen |
-| DiagnosticReport | `POST /DiagnosticReport` | Befund dokumentieren |
-| Observation | `POST /Observation` | Strukturierte Befundwerte (SNOMED) |
-| AuditEvent | `POST /AuditEvent` | Audit-Trail für jeden Vorgang |
-
----
-
-## 5. Ablauf (Patient Journey)
-1. Patient kommt in die Notaufnahme mit Gesundheitskarte (eGK)
-↓
-2. Patient wird per KVID/Name im FHIR-Server gesucht
-↓ (nicht gefunden)
-3. Patient wird neu angelegt (FHIR + MongoDB)
-↓
-4. DSGVO-Consent wird eingeholt
-↓
-5. Röntgenauftrag wird erstellt (ServiceRequest)
-↓
-6. Bildstudie wird angelegt (ImagingStudy - Stub)
-↓
-7. Befund wird dokumentiert (DiagnosticReport + Observation)
-↓
-8. AuditEvent wird für jeden Schritt erstellt
-↓
-9. Erfolgs, oder Fehlermeldung als HTTP Response
+| Benutzername | Passwort | Rolle |
+|-------------|----------|-------|
+| `mfa` | `demo` | Pflege (ER_NURSE) |
+| `arzt` | `demo` | Arzt (ER_DOCTOR) |
+| `radiologie` | `demo` | Radiologie-Tech (RAD_TECH) |
+| `radiologe` | `demo` | Radiologe (RADIOLOGIST) |
 
 ---
 
-## 6. API-Endpunkte
-
-| Methode | Endpunkt | Beschreibung |
-|---------|----------|--------------|
-| GET | `/` | API Status |
-| POST | `/patient/aufnahme` | Patient suchen oder neu anlegen |
-| POST | `/radiologie/auftrag` | Röntgenauftrag (ServiceRequest) erstellen |
-| POST | `/radiologie/studie` | Bildstudie (ImagingStudy) anlegen |
-| POST | `/radiologie/befund` | Befund (DiagnosticReport + Observation) |
-| GET | `/audit/:patientId` | AuditEvents eines Patienten abrufen |
-
----
-
-## 7. Datenspeicherung
-
-### Was wird lokal in MongoDB gespeichert?
-- Patientenstammdaten (Name, Geburtsdatum, KVID, FHIR-ID)
-- AuditEvent-Logs (Transaktionstyp, Zeitstempel, Status)
-
-### Was wird nur auf dem FHIR-Server gespeichert?
-- Diagnosen (Condition)
-- Röntgenaufträge (ServiceRequest)
-- Bildstudien (ImagingStudy)
-- Befunde (DiagnosticReport, Observation)
-
-### Begründung
-Gemäß DSGVO-Datensparsamkeitsprinzip werden nur die Daten lokal gespeichert, die für den Betrieb des Systems notwendig sind. Medizinische Befunddaten verbleiben auf dem FHIR-Server.
-
----
-
-## 8. Sicherheitsaspekte
-
-- **Audit-Trail:** Jeder Vorgang hinterlässt einen AuditEvent auf dem FHIR-Server und in der lokalen MongoDB
-- **DSGVO:** Nur notwendige Daten werden lokal gespeichert
-- **Fehlerbehandlung:** Alle Endpunkte haben try/catch mit aussagekräftigen Fehlermeldungen
-
----
-
-## 9. Technologieentscheidungen
-
-| Entscheidung | Gewählt | Begründung |
-|--------------|---------|------------|
-| Laufzeitumgebung | Node.js | Bereits in der Übung verwendet, gute FHIR-Unterstützung |
-| Web-Framework | Express.js | Einfach, weit verbreitet, gut dokumentiert |
-| Datenbank | MongoDB | Flexibles Schema, gut für JSON-ähnliche FHIR-Daten |
-| ODM | Mongoose | Validierung und Schema-Definition für MongoDB |
-| FHIR-Server | HAPI FHIR R4 | Öffentlicher Testserver, vom Prof vorgegeben |
-| HTTP-Client | fetch (built-in) | Kein extra Package nötig ab Node.js 18+ |
-
----
-
-## 10. Aufgabenverteilung
+## Aufgabenverteilung
 
 | Person | Aufgabe |
 |--------|---------|
-| Amna Al-Sorani | Infrastruktur: Patient-Aufnahme, MongoDB-Setup, AuditEvents |
-| Myriam Makdis | 
-| Malte | 
-| Witalik | 
+| Amna | MongoDB Schemas, Stores, database.js |
+| Myriam | FHIR-Client, Resource Builder, Hilfsservices |
+| Malte | API-Router, Validierung, OpenAPI |
+| Witalik | Auth-Service, Docker, Middleware, Workflow-Orchestrierung |

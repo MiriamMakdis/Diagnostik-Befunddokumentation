@@ -53,5 +53,8 @@ async function addFhirReferences(processId, refs) {
   );
 
 }
+async function listProcessesByStatus(status) {
+  return await ProcessModel.find({ status }).sort({ createdAt: -1 });
+}
 
-module.exports = { createProcess, findProcessById, updateProcessStatus, addFhirReferences };
+module.exports = { createProcess, findProcessById, updateProcessStatus, addFhirReferences, listProcessesByStatus };

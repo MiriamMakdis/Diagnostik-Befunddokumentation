@@ -1,11 +1,8 @@
 const ErrorModel = require('../models/error.model');
-
 const { v4: uuidv4 } = require('uuid');
 
-async function saveError({ processId, transactionId, organizationId, actorSub, actorRole, errorCode, httpStatus, message }) {
-
+async function saveTechnicalError({ processId, transactionId, organizationId, actorSub, actorRole, errorCode, httpStatus, message }) {
   const error = new ErrorModel({
-
     errorId: uuidv4(),
     processId,
     transactionId,
@@ -15,17 +12,12 @@ async function saveError({ processId, transactionId, organizationId, actorSub, a
     errorCode,
     httpStatus,
     message
-
   });
-
   return await error.save();
-
 }
 
 async function findErrorsByProcessId(processId) {
-
   return await ErrorModel.find({ processId }).sort({ createdAt: 1 });
-
 }
 
-module.exports = { saveError, findErrorsByProcessId };
+module.exports = { saveTechnicalError, findErrorsByProcessId };
