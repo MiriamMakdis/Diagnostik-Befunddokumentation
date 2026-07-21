@@ -37,6 +37,8 @@ Das startet automatisch:
 
 ### Testen
 - Backend: http://localhost:3000
+- Swagger: http://localhost:3000/docs
+  
 - Auth-Service: http://localhost:4000/api/auth/login
 - Swagger: http://localhost:4000/docs
 
