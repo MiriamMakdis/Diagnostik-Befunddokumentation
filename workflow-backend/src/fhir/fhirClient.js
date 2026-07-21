@@ -1,4 +1,4 @@
-import axios from 'axios'
+ const axios = require('axios');
 
 const FHIR_BASE_URL = 'https://hapi.fhir.org/baseR4';
 
@@ -26,7 +26,7 @@ const handleFhirError = (error, contextMessage) => {
 * @returns {Promise<Object>} Die vom Server zurückgegebene Ressource (inkl. ID)
 */
 
-export const createFhirResource = async (resourceType, resourceData) => {
+const createFhirResource = async (resourceType, resourceData) => {
   try {
     const response = await fhirAxios.post(`/${resourceType}`, resourceData);
     return response.data;
@@ -63,7 +63,7 @@ const readFhirResource = async (resourceTypeOrReference, id) => {
  * @returns {Promise<Object>} Das Bundle-Response-Ergebnis vom Server
  */ 
 
-export const sendTransactionBundle = async (bundleData) => {
+const sendTransactionBundle = async (bundleData) => {
   try {
     const response = await fhirAxios.post('/', bundleData);
     return response.data;
@@ -72,7 +72,7 @@ export const sendTransactionBundle = async (bundleData) => {
   }
 };
 
-export const searchFhirResource = async (resourceType, searchParams = {}) => {
+const searchFhirResource = async (resourceType, searchParams = {}) => {
   try {
     const response = await fhirAxios.get(`/${resourceType}`, {
       params: searchParams
@@ -84,9 +84,9 @@ export const searchFhirResource = async (resourceType, searchParams = {}) => {
   }
 };
 
-export default {
+module.exports = { 
   createFhirResource,
   readFhirResource,
   sendTransactionBundle,
   searchFhirResource
-};
+ };
