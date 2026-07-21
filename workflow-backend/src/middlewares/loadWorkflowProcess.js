@@ -2,7 +2,7 @@ const ErrorCodes = require('../constants/errorCodes');
 const { getMessageForErrorCode } = require('../constants/errorMessages');
 const { getHttpStatusForErrorCode } = require('../constants/errorHttpStatus');
 const WorkflowStatus = require('../constants/workflowStatus');
-const { findProcessById } = require('../dataAccess/processStore');
+const { findProcessById } = require('../stores/processStore');
 
 const loadWorkflowProcess = async (req, res, next) => {
   try {
