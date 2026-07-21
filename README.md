@@ -1,10 +1,10 @@
 # Diagnostik-Befunddokumentation
 
 ## Gruppe
-- Myriam Makdis
-- Malte
+- Myriam Makdis Antoun
+- Malte Maier
 - Amna Al-Sorani
-- Witalik
+- Witali Klein
 
 ## GitHub Repository
 https://github.com/MiriamMakdis/Diagnostik-Befunddokumentation
