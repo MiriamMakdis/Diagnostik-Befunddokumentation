@@ -10,7 +10,7 @@ const buildTransactionBundle = (resources) => {
       throw new Error(`Ressource vom Typ ${resource.resourceType} besitzt keine (temporäre) ID. Bundling abgebrochen.`);
     }
 
-    const { recourceId, ...resourceWithoutTemporaryId } = resource;
+    const { id:recourceId, ...resourceWithoutTemporaryId } = resource;
 
     return {
       fullUrl: recourceId,
