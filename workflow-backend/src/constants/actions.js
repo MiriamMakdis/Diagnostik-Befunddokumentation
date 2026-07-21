@@ -1,3 +1,4 @@
+const WorkflowStatus = require('./workflowStatus');
 const Actions = Object.freeze({
   CREATE_RADIOLOGY_ORDER: "CREATE_RADIOLOGY_ORDER",
   REGISTER_IMAGING_STUDY: "REGISTER_IMAGING_STUDY",

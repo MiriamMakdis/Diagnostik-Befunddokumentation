@@ -16,6 +16,7 @@ const {
 } = require("./nextStepService");
 
 const { executePatientAdmission } = require("./admissionService");
+const { searchPatientByKvnr } = require("./patientService");
 
 const fhirClient = require("../fhir/fhirClient");
 
@@ -283,7 +284,6 @@ const normalizeAdmissionRefs = (admissionResult) => {
 
 const buildAdmissionInput = (input) => {
   const patient = input.patient || {};
-
   const firstCondition = input.conditions?.[0] || {};
 
   return {
@@ -302,6 +302,32 @@ const buildAdmissionInput = (input) => {
     conditions: input.conditions || [],
     medications: input.medications || [],
   };
+};
+
+const findExistingPatientRef = async (admissionInput) => {
+  if (!admissionInput.kvnr) {
+    return null;
+  }
+
+  const patients = await searchPatientByKvnr({
+    kvnr: admissionInput.kvnr,
+  });
+
+  const existingPatient = patients?.[0];
+
+  if (!existingPatient) {
+    return null;
+  }
+
+  if (existingPatient.reference) {
+    return existingPatient.reference;
+  }
+
+  if (existingPatient.id) {
+    return `Patient/${existingPatient.id}`;
+  }
+
+  return null;
 };
 
 const getPatientIdFromRef = (patientRef) => {
@@ -441,7 +467,14 @@ const startDiagnosticWorkflow = async ({ user, input }) => {
   try {
     ensureConsentAccepted(consent);
 
-    const rawAdmissionResult = await executePatientAdmission(admissionInput);
+    const existingPatientRef = await findExistingPatientRef(admissionInput);
+
+    const rawAdmissionResult = await executePatientAdmission({
+      ...admissionInput,
+      existingPatientRef,
+      user,
+    });
+
     const admissionRefs = normalizeAdmissionRefs(rawAdmissionResult);
 
     if (!admissionRefs.patientRef || !admissionRefs.encounterRef) {
