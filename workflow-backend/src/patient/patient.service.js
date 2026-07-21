@@ -1,4 +1,4 @@
-const BASE_URL = 'https://hapi.fhir.org/baseR4';
+const BASE_URL = process.env.FHIR_BASE_URL || 'https://hapi.fhir.org/baseR4';
 
 async function searchPatient({ family, given, birthdate }) {
   const params = new URLSearchParams();
