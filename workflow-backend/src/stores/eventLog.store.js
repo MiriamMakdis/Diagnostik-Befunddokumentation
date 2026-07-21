@@ -1,9 +1,9 @@
 const EventLogModel = require('../models/eventLog.model');
 const { v4: uuidv4 } = require('uuid');
 
-async function saveEventLog({ processId, transactionId, organizationId, actorSub, actorRole, eventType, eventStatus, httpStatus, fhirResourceType, fhirResourceRef }) {
+async function saveEventLog({eventId, processId, transactionId, organizationId, actorSub, actorRole, eventType, eventStatus, httpStatus, fhirResourceType, fhirResourceRef, errorCode }) {
   const event = new EventLogModel({
-    eventId: uuidv4(),
+    eventId: eventId || uuidv4(),
     processId,
     transactionId,
     organizationId,
@@ -13,7 +13,8 @@ async function saveEventLog({ processId, transactionId, organizationId, actorSub
     eventStatus,
     httpStatus,
     fhirResourceType,
-    fhirResourceRef
+    fhirResourceRef,
+    errorCode
   });
   return await event.save();
 }

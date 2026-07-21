@@ -9,7 +9,6 @@ const workflowRoutes = require('./src/routes/diagnosticWorkflowsApi');
 const radiologyRoutes = require('./src/routes/radiologyApi');
 const emergencyRoutes = require('./src/routes/emergencyApi');
 
-const auth
 const notFoundHandler = require('./src/middlewares/notFoundHandler');
 const errorHandler = require('./src/middlewares/errorHandler')
 
@@ -20,11 +19,10 @@ const requireAuth = require('./src/middlewares/requireAuth')
 //console.log(swaggerDocs)
 
 const app = express();
-app.use(express.json)
+app.use(express.json())
 
 connectDB();
 
-app.use(()=>console.log("using stuff"));
 app.use(requireAuth);
 
 app.use('/api/v1/patients', patientRoutes);
