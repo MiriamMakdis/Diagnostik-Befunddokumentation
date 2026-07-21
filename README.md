@@ -34,7 +34,7 @@ Das startet automatisch:
 ---
 
 ## Projektstruktur
-
+```
 Diagnostik-Befunddokumentation/
 ├── auth/                          # Auth-Service (JWT, Rollen)
 │   └── src/
@@ -53,7 +53,7 @@ Diagnostik-Befunddokumentation/
 ├── docker-compose.yml
 ├── Planungsdokument.md
 └── README.md
-
+```
 
 ----
 
