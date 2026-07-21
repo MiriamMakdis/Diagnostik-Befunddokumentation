@@ -191,6 +191,8 @@ Dieser Endpunkt sucht nur im FHIR-Server. Er erstellt keinen Patienten und start
 
 ### Schritt 3: Workflow starten
 
+(Darauf achten, dass die Fhir Ressourcen auf dem Testserver noch nicht existieren)
+
 ```http
 POST http://localhost:3000/api/v1/diagnostic-workflows
 Authorization: Bearer <pflege-token>
