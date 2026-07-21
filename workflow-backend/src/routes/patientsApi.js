@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const PatientModel = require('./patient.schema');
-const { searchPatient, createPatientFHIR } = require('./patient.service');
+const PatientModel = require('../models/patient.model');
+const { searchPatient, createPatientFHIR } = require('../services/patientService');
 const { createAuditEventFHIR } = require('../audit/audit.service');
 const AuditEventModel = require('../audit/auditEvent.schema');
 
+router.get('/',(req,res)=>{
+    res.send("Hello")    
+})
+
 // POST /patient/aufnahme
-router.post('/aufnahme', async (req, res) => {
+router.post('/aufnahme', async (req, res, next) => {
   try {
     const { familyName, givenName, birthDate, kvid, gender } = req.body;
 
@@ -62,8 +66,7 @@ router.post('/aufnahme', async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Fehler bei der Patient-Aufnahme' });
+    next(error);
   }
 });
 
