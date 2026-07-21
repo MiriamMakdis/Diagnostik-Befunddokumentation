@@ -1,14 +1,28 @@
 const mongoose = require('mongoose');
 
-const connectDB = async () => {
-  try {
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/diagnostik';
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-    await mongoose.connect(mongoUri);
-    console.log('MongoDB verbunden');
-  } catch (err) {
-    console.error('MongoDB Fehler:', err);
-    process.exit(1);
+const connectDB = async () => {
+  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/diagnostik';
+
+  for (let attempt = 1; attempt <= 10; attempt += 1) {
+    try {
+      console.log(`MongoDB-Verbindungsversuch ${attempt}: ${mongoUri}`);
+      await mongoose.connect(mongoUri);
+      console.log('MongoDB verbunden');
+      return;
+    } catch (error) {
+      console.error(
+        `MongoDB-Verbindung fehlgeschlagen, Versuch ${attempt}/10:`,
+        error.message
+      );
+
+      if (attempt === 10) {
+        throw error;
+      }
+
+      await sleep(3000);
+    }
   }
 };
 

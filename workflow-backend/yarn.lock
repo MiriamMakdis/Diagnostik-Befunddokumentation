@@ -429,6 +429,7 @@ __metadata:
     mongoose: "npm:^9.7.4"
     nodemon: "npm:^3.1.14"
     swagger-jsdoc: "npm:^6.3.0"
+    swagger-ui-dist: "npm:^5.32.10"
     swagger-ui-express: "npm:^5.0.1"
     uuid: "npm:^14.0.1"
     zod: "npm:^4.4.3"
@@ -1680,6 +1681,15 @@ __metadata:
   dependencies:
     "@scarf/scarf": "npm:=1.4.0"
   checksum: 10c0/1d69eb8bbff3d92e74370c3f397f31abda231599fe6acb9b8016ffc4af337891fecfc971cb6aa816df49e0e873f97d856dd75ea6da9502355cdd9d0faf532ebf
+  languageName: node
+  linkType: hard
+
+"swagger-ui-dist@npm:^5.32.10":
+  version: 5.32.10
+  resolution: "swagger-ui-dist@npm:5.32.10"
+  dependencies:
+    "@scarf/scarf": "npm:=1.4.0"
+  checksum: 10c0/17488254238e25ee17cc82d0d9425244d7e664c1359417f1ef184be51a9c5257fbea6e7bd71e83c6bc5f9ab58105f9a5431e52520b6d46609578f990af8d3e32
   languageName: node
   linkType: hard
 

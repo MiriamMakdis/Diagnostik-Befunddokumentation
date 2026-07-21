@@ -11,6 +11,7 @@ RUN yarn install --immutable
 COPY src ./src
 COPY server.js ./server.js
 COPY test-data ./test-data
+COPY docs ./docs
 
 EXPOSE 3000
 

@@ -1,0 +1,1702 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Workflow-Backend API",
+    "version": "1.0.0",
+    "description": "Workflow-Backend für den Vertical Slice Diagnostik und Befunddokumentation. Der Service orchestriert die Aufnahme, den Röntgenauftrag, die ImagingStudy, den radiologischen Befund sowie Audit-/FHIR-Referenz-Lesezugriffe."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Lokale Entwicklung"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Status-Endpunkte des Workflow-Backends"
+    },
+    {
+      "name": "Patients",
+      "description": "Fachliche Patientensuche im FHIR-Server"
+    },
+    {
+      "name": "Diagnostic Workflows",
+      "description": "Hauptworkflow für Aufnahme, Röntgenauftrag, Bildgebung und Befund"
+    },
+    {
+      "name": "Radiology",
+      "description": "Radiologie-Worklist"
+    },
+    {
+      "name": "Emergency",
+      "description": "Notaufnahme-Worklist"
+    },
+    {
+      "name": "Audit",
+      "description": "Lokale Events und gespeicherte FHIR-Referenzen"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health Check",
+        "description": "Prüft, ob das Workflow-Backend erreichbar ist.",
+        "operationId": "getWorkflowBackendHealth",
+        "responses": {
+          "200": {
+            "description": "Workflow-Backend läuft.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "OK",
+                  "service": "workflow-backend"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/patients/search": {
+      "post": {
+        "tags": [
+          "Patients"
+        ],
+        "summary": "Patient im FHIR-Server suchen",
+        "description": "Sucht einen Patienten im HAPI FHIR R4 Server. Dieser Endpunkt erstellt keinen Patienten, startet keinen Workflow und speichert keine Patientendaten lokal.",
+        "operationId": "searchPatient",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Suchkriterien. Entweder KVNR/KVID oder Name/Geburtsdatum.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatientSearchRequest"
+              },
+              "examples": {
+                "kvnrSearch": {
+                  "summary": "Suche per KVNR",
+                  "value": {
+                    "kvnr": "X110411319"
+                  }
+                },
+                "nameSearch": {
+                  "summary": "Suche per Stammdaten",
+                  "value": {
+                    "familyName": "Musterfrau",
+                    "givenName": "Maria",
+                    "birthDate": "1985-04-12"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Suche wurde erfolgreich ausgeführt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientSearchResponse"
+                },
+                "example": {
+                  "status": "SUCCESS",
+                  "count": 1,
+                  "patients": [
+                    {
+                      "id": "12345",
+                      "reference": "Patient/12345",
+                      "familyName": "Musterfrau",
+                      "givenName": "Maria",
+                      "birthDate": "1985-04-12",
+                      "gender": "female",
+                      "identifier": [
+                        {
+                          "system": "http://fhir.de/sid/gkv/kvid-10",
+                          "value": "X110411319"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "502": {
+            "$ref": "#/components/responses/FhirError"
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostic-workflows": {
+      "post": {
+        "tags": [
+          "Diagnostic Workflows"
+        ],
+        "summary": "Diagnostik-Workflow starten",
+        "description": "Startet den Workflow mit Aufnahme und Anamnese. Intern wird der Patient per KVNR gesucht oder in FHIR erstellt. Danach werden Encounter, Condition(s), MedicationStatement(s), Consent und Provenance erzeugt. Lokal werden nur Prozessdaten, Status, Events und FHIR-Referenzen gespeichert.",
+        "operationId": "startDiagnosticWorkflow",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Aufnahme- und Anamnesedaten.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartWorkflowRequest"
+              },
+              "example": {
+                "patient": {
+                  "kvnr": "X110411319",
+                  "firstName": "Maria",
+                  "lastName": "Musterfrau",
+                  "birthDate": "1985-04-12",
+                  "gender": "female"
+                },
+                "consent": {
+                  "accepted": true
+                },
+                "conditions": [
+                  {
+                    "icdCode": "E11.9",
+                    "icdDisplay": "Diabetes mellitus Typ 2 ohne Komplikationen"
+                  }
+                ],
+                "medications": [
+                  {
+                    "medicationText": "Metformin 500 mg",
+                    "dosageText": "1-0-1",
+                    "status": "active"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Workflow wurde erfolgreich gestartet.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowStepResponse"
+                },
+                "example": {
+                  "status": "INTAKE_COMPLETED",
+                  "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                  "message": "Aufnahme und Anamnese wurden erfolgreich gespeichert.",
+                  "nextStep": {
+                    "action": "CREATE_RADIOLOGY_ORDER",
+                    "label": "Röntgenauftrag erstellen",
+                    "requiredScope": "radiology-order:create",
+                    "recommendedRole": "ER_DOCTOR",
+                    "method": "POST",
+                    "path": "/api/v1/diagnostic-workflows/7d4f9f2e-0c2d-4b7a-8b74-123456789abc/radiology-orders"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "409": {
+            "description": "Einwilligung abgelehnt oder Workflow kann nicht gestartet werden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "status": "ERROR",
+                  "errorCode": "CONSENT_REJECTED",
+                  "message": "Die Einwilligung wurde abgelehnt. Der Workflow wird nicht fortgesetzt."
+                }
+              }
+            }
+          },
+          "502": {
+            "$ref": "#/components/responses/FhirError"
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostic-workflows/{processId}": {
+      "get": {
+        "tags": [
+          "Diagnostic Workflows"
+        ],
+        "summary": "Workflow-Status abrufen",
+        "description": "Gibt den technischen Status des Workflows und den nächsten möglichen Schritt zurück.",
+        "operationId": "getDiagnosticWorkflow",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProcessId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workflow wurde gefunden.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowStatusResponse"
+                },
+                "example": {
+                  "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                  "workflowType": "DIAGNOSTIC_WORKFLOW",
+                  "status": "INTAKE_COMPLETED",
+                  "nextStep": {
+                    "action": "CREATE_RADIOLOGY_ORDER",
+                    "label": "Röntgenauftrag erstellen",
+                    "method": "POST",
+                    "path": "/api/v1/diagnostic-workflows/7d4f9f2e-0c2d-4b7a-8b74-123456789abc/radiology-orders"
+                  },
+                  "createdAt": "2026-07-21T17:00:00.000Z",
+                  "updatedAt": "2026-07-21T17:00:00.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostic-workflows/{processId}/context": {
+      "get": {
+        "tags": [
+          "Diagnostic Workflows"
+        ],
+        "summary": "Workflow-Kontext abrufen",
+        "description": "Lädt anhand der gespeicherten FHIR-Referenzen einen reduzierten, rollenabhängigen Kontext aus dem FHIR-Server. Die Daten werden nicht lokal persistiert.",
+        "operationId": "getWorkflowContext",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProcessId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Kontext wurde erfolgreich geladen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowContextResponse"
+                },
+                "example": {
+                  "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                  "status": "RADIOLOGY_ORDER_CREATED",
+                  "patient": {
+                    "reference": "Patient/12345",
+                    "name": {
+                      "firstName": "Maria",
+                      "lastName": "Musterfrau"
+                    },
+                    "birthDate": "1985-04-12",
+                    "gender": "female"
+                  },
+                  "encounter": {
+                    "reference": "Encounter/67890",
+                    "status": "in-progress"
+                  },
+                  "radiologyOrder": {
+                    "reference": "ServiceRequest/11111",
+                    "status": "active",
+                    "procedure": "X-ray wrist",
+                    "reason": [
+                      "Sturz auf die rechte Hand"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "502": {
+            "$ref": "#/components/responses/FhirError"
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostic-workflows/{processId}/radiology-orders": {
+      "post": {
+        "tags": [
+          "Diagnostic Workflows"
+        ],
+        "summary": "Röntgenauftrag erstellen",
+        "description": "Erstellt eine FHIR ServiceRequest-Ressource für den Röntgenauftrag. Der Workflow muss vorher den Status INTAKE_COMPLETED haben.",
+        "operationId": "createRadiologyOrder",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProcessId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RadiologyOrderRequest"
+              },
+              "example": {
+                "procedureCode": "36643-5",
+                "procedureDisplay": "X-ray wrist",
+                "bodySiteCode": "368209003",
+                "bodySiteDisplay": "Right wrist",
+                "reason": "Sturz auf die rechte Hand, Verdacht auf Fraktur"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Röntgenauftrag wurde erstellt.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowStepResponse"
+                },
+                "example": {
+                  "status": "RADIOLOGY_ORDER_CREATED",
+                  "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                  "message": "Röntgenauftrag wurde erfolgreich erstellt.",
+                  "serviceRequestRef": "ServiceRequest/11111",
+                  "nextStep": {
+                    "action": "REGISTER_IMAGING_STUDY",
+                    "label": "ImagingStudy registrieren",
+                    "requiredScope": "imaging-study:create",
+                    "recommendedRole": "RAD_TECH",
+                    "method": "POST",
+                    "path": "/api/v1/diagnostic-workflows/7d4f9f2e-0c2d-4b7a-8b74-123456789abc/imaging-studies"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/InvalidWorkflowState"
+          },
+          "502": {
+            "$ref": "#/components/responses/FhirError"
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostic-workflows/{processId}/imaging-studies": {
+      "post": {
+        "tags": [
+          "Diagnostic Workflows"
+        ],
+        "summary": "ImagingStudy registrieren",
+        "description": "Erstellt eine FHIR ImagingStudy als Stub ohne echte DICOM-Daten. Der Workflow muss vorher den Status RADIOLOGY_ORDER_CREATED haben.",
+        "operationId": "registerImagingStudy",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProcessId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImagingStudyRequest"
+              },
+              "example": {
+                "studyInstanceUid": "2.25.123456789012345678901234567890",
+                "modalityCode": "DX",
+                "modalityDisplay": "Digital Radiography",
+                "description": "Röntgen rechtes Handgelenk, Stub ohne echte DICOM-Daten",
+                "started": "2026-07-21T17:10:00.000Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "ImagingStudy wurde registriert.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowStepResponse"
+                },
+                "example": {
+                  "status": "IMAGING_STUDY_REGISTERED",
+                  "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                  "message": "ImagingStudy wurde erfolgreich registriert.",
+                  "imagingStudyRef": "ImagingStudy/22222",
+                  "nextStep": {
+                    "action": "CREATE_DIAGNOSTIC_REPORT",
+                    "label": "Befund dokumentieren",
+                    "requiredScope": "diagnostic-report:create",
+                    "recommendedRole": "RADIOLOGIST",
+                    "method": "POST",
+                    "path": "/api/v1/diagnostic-workflows/7d4f9f2e-0c2d-4b7a-8b74-123456789abc/diagnostic-reports"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/InvalidWorkflowState"
+          },
+          "502": {
+            "$ref": "#/components/responses/FhirError"
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostic-workflows/{processId}/diagnostic-reports": {
+      "post": {
+        "tags": [
+          "Diagnostic Workflows"
+        ],
+        "summary": "Radiologischen Befund erstellen",
+        "description": "Erstellt strukturierte Observation-Ressourcen und einen DiagnosticReport. Der DiagnosticReport referenziert Patient, Encounter, ServiceRequest, ImagingStudy und Observation(s). Der Workflow muss vorher den Status IMAGING_STUDY_REGISTERED haben.",
+        "operationId": "createDiagnosticReport",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProcessId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiagnosticReportRequest"
+              },
+              "example": {
+                "conclusion": "Kein sicherer Frakturnachweis. Weichteilschwellung radial.",
+                "findings": [
+                  {
+                    "code": "59776-5",
+                    "display": "Procedure findings",
+                    "valueString": "Keine dislozierte Fraktur sichtbar.",
+                    "interpretationCode": "N",
+                    "interpretationDisplay": "Normal"
+                  },
+                  {
+                    "code": "11348-0",
+                    "display": "Fracture location",
+                    "valueCode": "74670003",
+                    "valueDisplay": "Wrist region structure"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Befund wurde erstellt und Workflow abgeschlossen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowStepResponse"
+                },
+                "example": {
+                  "status": "SUCCESS",
+                  "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                  "message": "Radiologischer Befund wurde erfolgreich erstellt.",
+                  "observationRefs": [
+                    "Observation/33333",
+                    "Observation/33334"
+                  ],
+                  "diagnosticReportRef": "DiagnosticReport/44444",
+                  "nextStep": {
+                    "action": "NONE",
+                    "label": "Workflow abgeschlossen",
+                    "method": null,
+                    "path": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/InvalidWorkflowState"
+          },
+          "502": {
+            "$ref": "#/components/responses/FhirError"
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostic-workflows/{processId}/report-summary": {
+      "get": {
+        "tags": [
+          "Diagnostic Workflows"
+        ],
+        "summary": "Befundzusammenfassung abrufen",
+        "description": "Lädt den DiagnosticReport und die referenzierten Observations aus FHIR und gibt eine reduzierte Zusammenfassung zurück.",
+        "operationId": "getReportSummary",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProcessId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Befundzusammenfassung wurde geladen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportSummaryResponse"
+                },
+                "example": {
+                  "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                  "status": "SUCCESS",
+                  "diagnosticReport": {
+                    "reference": "DiagnosticReport/44444",
+                    "fhirStatus": "final",
+                    "issued": "2026-07-21T17:20:00.000Z",
+                    "conclusion": "Kein sicherer Frakturnachweis. Weichteilschwellung radial.",
+                    "code": "Diagnostic imaging report"
+                  },
+                  "findings": [
+                    {
+                      "reference": "Observation/33333",
+                      "status": "final",
+                      "code": "Procedure findings",
+                      "value": "Keine dislozierte Fraktur sichtbar.",
+                      "interpretation": [
+                        "Normal"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "502": {
+            "$ref": "#/components/responses/FhirError"
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostic-workflows/{processId}/events": {
+      "get": {
+        "tags": [
+          "Audit"
+        ],
+        "summary": "Lokale Events abrufen",
+        "description": "Gibt die lokal gespeicherten technischen Event-Logs für einen Workflow zurück.",
+        "operationId": "getWorkflowEvents",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProcessId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Events wurden geladen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventsResponse"
+                },
+                "example": {
+                  "status": "SUCCESS",
+                  "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                  "events": [
+                    {
+                      "eventType": "INTAKE_COMPLETED",
+                      "eventStatus": "SUCCESS",
+                      "actorRole": "ER_NURSE",
+                      "httpStatus": 201,
+                      "createdAt": "2026-07-21T17:00:00.000Z"
+                    },
+                    {
+                      "eventType": "RADIOLOGY_ORDER_CREATED",
+                      "eventStatus": "SUCCESS",
+                      "actorRole": "ER_DOCTOR",
+                      "httpStatus": 201,
+                      "createdAt": "2026-07-21T17:05:00.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/diagnostic-workflows/{processId}/fhir-references": {
+      "get": {
+        "tags": [
+          "Audit"
+        ],
+        "summary": "FHIR-Referenzen abrufen",
+        "description": "Gibt die lokal gespeicherten FHIR-Referenzen eines Workflows zurück. Es werden keine medizinischen Klartextdaten aus MongoDB zurückgegeben.",
+        "operationId": "getWorkflowFhirReferences",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProcessId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "FHIR-Referenzen wurden geladen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FhirReferencesResponse"
+                },
+                "example": {
+                  "status": "SUCCESS",
+                  "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                  "fhirRefs": {
+                    "patientRef": "Patient/12345",
+                    "encounterRef": "Encounter/67890",
+                    "consentRef": "Consent/99999",
+                    "conditionRefs": [
+                      "Condition/55555"
+                    ],
+                    "medicationStatementRefs": [
+                      "MedicationStatement/66666"
+                    ],
+                    "serviceRequestRef": "ServiceRequest/11111",
+                    "imagingStudyRef": "ImagingStudy/22222",
+                    "observationRefs": [
+                      "Observation/33333"
+                    ],
+                    "diagnosticReportRef": "DiagnosticReport/44444",
+                    "auditEventRefs": [
+                      "AuditEvent/77777"
+                    ],
+                    "provenanceRefs": [
+                      "Provenance/88888"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/v1/radiology/worklist": {
+      "get": {
+        "tags": [
+          "Radiology"
+        ],
+        "summary": "Radiologie-Worklist abrufen",
+        "description": "Gibt je nach Rolle passende Radiologie-Aufgaben zurück. RAD_TECH sieht offene ImagingStudy-Registrierungen, RADIOLOGIST sieht Fälle für die Befundung.",
+        "operationId": "getRadiologyWorklist",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Radiologie-Worklist wurde geladen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorklistResponse"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                      "workflowType": "DIAGNOSTIC_WORKFLOW",
+                      "status": "RADIOLOGY_ORDER_CREATED",
+                      "nextStep": {
+                        "action": "REGISTER_IMAGING_STUDY",
+                        "label": "ImagingStudy registrieren"
+                      },
+                      "patientRef": "Patient/12345",
+                      "encounterRef": "Encounter/67890",
+                      "serviceRequestRef": "ServiceRequest/11111",
+                      "imagingStudyRef": null,
+                      "diagnosticReportRef": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/api/v1/emergency/worklist": {
+      "get": {
+        "tags": [
+          "Emergency"
+        ],
+        "summary": "Notaufnahme-Worklist abrufen",
+        "description": "Gibt Workflows zurück, die für die Notaufnahme sichtbar sind, zum Beispiel laufende Fälle oder abgeschlossene Befunde.",
+        "operationId": "getEmergencyWorklist",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notaufnahme-Worklist wurde geladen.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorklistResponse"
+                },
+                "example": {
+                  "items": [
+                    {
+                      "processId": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc",
+                      "workflowType": "DIAGNOSTIC_WORKFLOW",
+                      "status": "SUCCESS",
+                      "nextStep": {
+                        "action": "NONE",
+                        "label": "Workflow abgeschlossen"
+                      },
+                      "patientRef": "Patient/12345",
+                      "encounterRef": "Encounter/67890",
+                      "serviceRequestRef": "ServiceRequest/11111",
+                      "imagingStudyRef": "ImagingStudy/22222",
+                      "diagnosticReportRef": "DiagnosticReport/44444"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT aus dem Auth-Service. In Swagger normalerweise nur den Token einfügen, nicht zusätzlich 'Bearer'."
+      }
+    },
+    "parameters": {
+      "ProcessId": {
+        "name": "processId",
+        "in": "path",
+        "required": true,
+        "description": "Technische ID des lokalen Workflow-Prozesses.",
+        "schema": {
+          "type": "string"
+        },
+        "example": "7d4f9f2e-0c2d-4b7a-8b74-123456789abc"
+      }
+    },
+    "responses": {
+      "ValidationError": {
+        "description": "Request ist ungültig.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "ERROR",
+              "errorCode": "VALIDATION_ERROR",
+              "message": "Request-Validierung fehlgeschlagen."
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Token fehlt, ist ungültig oder abgelaufen.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "ERROR",
+              "errorCode": "UNAUTHORIZED",
+              "message": "Bearer Token fehlt oder ist ungültig."
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Benutzer besitzt nicht die erforderlichen Rechte.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "ERROR",
+              "errorCode": "FORBIDDEN",
+              "message": "Für diese Aktion fehlen Berechtigungen."
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Ressource wurde nicht gefunden.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "ERROR",
+              "errorCode": "PROCESS_NOT_FOUND",
+              "message": "Der Workflow-Prozess wurde nicht gefunden."
+            }
+          }
+        }
+      },
+      "InvalidWorkflowState": {
+        "description": "Aktion ist im aktuellen Workflow-Status nicht erlaubt.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "ERROR",
+              "errorCode": "INVALID_WORKFLOW_STATE",
+              "message": "Diese Aktion ist im aktuellen Workflow-Status nicht erlaubt."
+            }
+          }
+        }
+      },
+      "FhirError": {
+        "description": "FHIR-Server konnte nicht erreicht werden oder hat einen Fehler zurückgegeben.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "status": "ERROR",
+              "errorCode": "FHIR_REQUEST_FAILED",
+              "message": "Fehler bei der Kommunikation mit dem FHIR-Server."
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "OK"
+          },
+          "service": {
+            "type": "string",
+            "example": "workflow-backend"
+          }
+        }
+      },
+      "PatientSearchRequest": {
+        "type": "object",
+        "properties": {
+          "kvnr": {
+            "type": "string",
+            "example": "X110411319"
+          },
+          "kvid": {
+            "type": "string",
+            "example": "X110411319"
+          },
+          "familyName": {
+            "type": "string",
+            "example": "Musterfrau"
+          },
+          "givenName": {
+            "type": "string",
+            "example": "Maria"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "example": "1985-04-12"
+          }
+        }
+      },
+      "PatientSearchResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "SUCCESS"
+          },
+          "count": {
+            "type": "integer",
+            "example": 1
+          },
+          "patients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatientSummary"
+            }
+          }
+        }
+      },
+      "PatientSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "12345"
+          },
+          "reference": {
+            "type": "string",
+            "example": "Patient/12345"
+          },
+          "familyName": {
+            "type": "string",
+            "example": "Musterfrau"
+          },
+          "givenName": {
+            "type": "string",
+            "example": "Maria"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "example": "1985-04-12"
+          },
+          "gender": {
+            "type": "string",
+            "example": "female"
+          },
+          "identifier": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "StartWorkflowRequest": {
+        "type": "object",
+        "required": [
+          "patient",
+          "consent"
+        ],
+        "properties": {
+          "patient": {
+            "$ref": "#/components/schemas/AdmissionPatient"
+          },
+          "consent": {
+            "$ref": "#/components/schemas/ConsentInput"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConditionInput"
+            }
+          },
+          "medications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MedicationInput"
+            }
+          }
+        }
+      },
+      "AdmissionPatient": {
+        "type": "object",
+        "required": [
+          "birthDate"
+        ],
+        "properties": {
+          "kvnr": {
+            "type": "string",
+            "example": "X110411319"
+          },
+          "kvid": {
+            "type": "string",
+            "example": "X110411319"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Maria"
+          },
+          "givenName": {
+            "type": "string",
+            "example": "Maria"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Musterfrau"
+          },
+          "familyName": {
+            "type": "string",
+            "example": "Musterfrau"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date",
+            "example": "1985-04-12"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "male",
+              "female",
+              "other",
+              "unknown"
+            ],
+            "example": "female"
+          }
+        }
+      },
+      "ConsentInput": {
+        "type": "object",
+        "required": [
+          "accepted"
+        ],
+        "properties": {
+          "accepted": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "ConditionInput": {
+        "type": "object",
+        "properties": {
+          "icdCode": {
+            "type": "string",
+            "example": "E11.9"
+          },
+          "code": {
+            "type": "string",
+            "example": "E11.9"
+          },
+          "icdDisplay": {
+            "type": "string",
+            "example": "Diabetes mellitus Typ 2 ohne Komplikationen"
+          },
+          "display": {
+            "type": "string",
+            "example": "Diabetes mellitus Typ 2 ohne Komplikationen"
+          }
+        }
+      },
+      "MedicationInput": {
+        "type": "object",
+        "properties": {
+          "medicationText": {
+            "type": "string",
+            "example": "Metformin 500 mg"
+          },
+          "name": {
+            "type": "string",
+            "example": "Metformin 500 mg"
+          },
+          "dosageText": {
+            "type": "string",
+            "example": "1-0-1"
+          },
+          "dosage": {
+            "type": "string",
+            "example": "1-0-1"
+          },
+          "status": {
+            "type": "string",
+            "example": "active"
+          }
+        }
+      },
+      "RadiologyOrderRequest": {
+        "type": "object",
+        "properties": {
+          "procedureCode": {
+            "type": "string",
+            "example": "36643-5"
+          },
+          "procedureDisplay": {
+            "type": "string",
+            "example": "X-ray wrist"
+          },
+          "orderCode": {
+            "type": "string",
+            "example": "36643-5"
+          },
+          "orderDisplay": {
+            "type": "string",
+            "example": "X-ray wrist"
+          },
+          "bodySiteCode": {
+            "type": "string",
+            "example": "368209003"
+          },
+          "bodySiteDisplay": {
+            "type": "string",
+            "example": "Right wrist"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Sturz auf die rechte Hand, Verdacht auf Fraktur"
+          }
+        }
+      },
+      "ImagingStudyRequest": {
+        "type": "object",
+        "properties": {
+          "studyInstanceUid": {
+            "type": "string",
+            "example": "2.25.123456789012345678901234567890"
+          },
+          "modalityCode": {
+            "type": "string",
+            "example": "DX"
+          },
+          "modalityDisplay": {
+            "type": "string",
+            "example": "Digital Radiography"
+          },
+          "description": {
+            "type": "string",
+            "example": "Röntgen rechtes Handgelenk, Stub ohne echte DICOM-Daten"
+          },
+          "started": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-07-21T17:10:00.000Z"
+          },
+          "status": {
+            "type": "string",
+            "example": "available"
+          },
+          "imageReference": {
+            "type": "string",
+            "example": "dicom-stub://study/2.25.123456789012345678901234567890"
+          }
+        }
+      },
+      "DiagnosticReportRequest": {
+        "type": "object",
+        "required": [
+          "conclusion"
+        ],
+        "properties": {
+          "conclusion": {
+            "type": "string",
+            "example": "Kein sicherer Frakturnachweis. Weichteilschwellung radial."
+          },
+          "status": {
+            "type": "string",
+            "example": "final"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FindingInput"
+            }
+          }
+        }
+      },
+      "FindingInput": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "59776-5"
+          },
+          "display": {
+            "type": "string",
+            "example": "Procedure findings"
+          },
+          "valueCode": {
+            "type": "string",
+            "example": "74670003"
+          },
+          "valueDisplay": {
+            "type": "string",
+            "example": "Wrist region structure"
+          },
+          "valueString": {
+            "type": "string",
+            "example": "Keine dislozierte Fraktur sichtbar."
+          },
+          "interpretationCode": {
+            "type": "string",
+            "example": "N"
+          },
+          "interpretationDisplay": {
+            "type": "string",
+            "example": "Normal"
+          },
+          "effectiveDateTime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-07-21T17:20:00.000Z"
+          }
+        }
+      },
+      "WorkflowStepResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "RADIOLOGY_ORDER_CREATED"
+          },
+          "processId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "serviceRequestRef": {
+            "type": "string",
+            "example": "ServiceRequest/11111"
+          },
+          "imagingStudyRef": {
+            "type": "string",
+            "example": "ImagingStudy/22222"
+          },
+          "observationRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "diagnosticReportRef": {
+            "type": "string",
+            "example": "DiagnosticReport/44444"
+          },
+          "nextStep": {
+            "$ref": "#/components/schemas/NextStep"
+          }
+        }
+      },
+      "WorkflowStatusResponse": {
+        "type": "object",
+        "properties": {
+          "processId": {
+            "type": "string"
+          },
+          "workflowType": {
+            "type": "string",
+            "example": "DIAGNOSTIC_WORKFLOW"
+          },
+          "status": {
+            "type": "string",
+            "example": "INTAKE_COMPLETED"
+          },
+          "nextStep": {
+            "$ref": "#/components/schemas/NextStep"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NextStep": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "example": "CREATE_RADIOLOGY_ORDER"
+          },
+          "label": {
+            "type": "string",
+            "example": "Röntgenauftrag erstellen"
+          },
+          "requiredScope": {
+            "type": "string",
+            "example": "radiology-order:create"
+          },
+          "recommendedRole": {
+            "type": "string",
+            "example": "ER_DOCTOR"
+          },
+          "method": {
+            "type": "string",
+            "example": "POST",
+            "nullable": true
+          },
+          "path": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WorkflowContextResponse": {
+        "type": "object",
+        "properties": {
+          "processId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "patient": {
+            "type": "object"
+          },
+          "encounter": {
+            "type": "object"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "medications": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "radiologyOrder": {
+            "type": "object"
+          },
+          "imagingStudy": {
+            "type": "object"
+          },
+          "diagnosticReport": {
+            "type": "object"
+          }
+        }
+      },
+      "ReportSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "processId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "diagnosticReport": {
+            "type": "object"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "EventsResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "SUCCESS"
+          },
+          "processId": {
+            "type": "string"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "FhirReferencesResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "SUCCESS"
+          },
+          "processId": {
+            "type": "string"
+          },
+          "fhirRefs": {
+            "$ref": "#/components/schemas/FhirRefs"
+          }
+        }
+      },
+      "FhirRefs": {
+        "type": "object",
+        "properties": {
+          "patientRef": {
+            "type": "string"
+          },
+          "encounterRef": {
+            "type": "string"
+          },
+          "consentRef": {
+            "type": "string"
+          },
+          "conditionRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "medicationStatementRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "serviceRequestRef": {
+            "type": "string"
+          },
+          "imagingStudyRef": {
+            "type": "string"
+          },
+          "observationRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "diagnosticReportRef": {
+            "type": "string"
+          },
+          "auditEventRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "provenanceRefs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "WorklistResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorklistItem"
+            }
+          }
+        }
+      },
+      "WorklistItem": {
+        "type": "object",
+        "properties": {
+          "processId": {
+            "type": "string"
+          },
+          "workflowType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "nextStep": {
+            "$ref": "#/components/schemas/NextStep"
+          },
+          "patientRef": {
+            "type": "string"
+          },
+          "encounterRef": {
+            "type": "string"
+          },
+          "serviceRequestRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "imagingStudyRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "diagnosticReportRef": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ERROR"
+          },
+          "errorCode": {
+            "type": "string",
+            "example": "INVALID_WORKFLOW_STATE"
+          },
+          "message": {
+            "type": "string",
+            "example": "Diese Aktion ist im aktuellen Workflow-Status nicht erlaubt."
+          }
+        }
+      }
+    }
+  }
+}

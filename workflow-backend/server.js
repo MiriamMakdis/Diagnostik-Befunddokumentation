@@ -5,6 +5,12 @@ dotenv.config();
 
 const connectDB = require('./src/db');
 
+const path = require('node:path');
+const swaggerUiDist = require('swagger-ui-dist');
+
+const swaggerUiPath = swaggerUiDist.absolutePath();
+const docsPath = path.join(__dirname, 'docs');
+
 const patientRoutes = require('./src/routes/patientsApi');
 const workflowRoutes = require('./src/routes/diagnosticWorkflowsApi');
 const radiologyRoutes = require('./src/routes/radiologyApi');
@@ -25,10 +31,22 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    service: 'workflow-backend'
+  res.status(200).json({
+    status: 'UP',
+    service: 'auth-service'
   });
+});
+
+app.use('/docs/swagger-ui', express.static(swaggerUiPath));
+
+app.use('/docs', express.static(docsPath));
+
+app.get('/docs/openapi.json', (req, res) => {
+  return res.sendFile(path.join(docsPath, 'openapi.json'));
+});
+
+app.get('/docs', (req, res) => {
+  return res.sendFile(path.join(docsPath, 'swagger.html'));
 });
 
 app.use('/api/v1/patients', patientRoutes);

@@ -32,7 +32,7 @@ services:
       - diag-bef-network
 
   mongodb:
-    image: mongo:4.4
+    image: mongo:7
     container_name: mongodb
     ports:
       - "27017:27017"
