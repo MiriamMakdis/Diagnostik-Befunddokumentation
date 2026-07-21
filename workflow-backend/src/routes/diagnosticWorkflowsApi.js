@@ -4,7 +4,10 @@ const router = express.Router();
 const { createAuditEventFHIR } = require('../audit/audit.service');
 const AuditEventModel = require('../audit/auditEvent.schema');
 const { listEventLogsByProcessId } = require('../stores/eventLog.store.js')
-const { getDiagnosticWorkflowById, createDiagnosticReport, registerImagingStudy, createRadiologyOrder, startDiagnosticWorkflow } = require('../services/diagnosticWorkflowService.js')
+
+const diagnosticWorkflowService = require('../services/diagnosticWorkflowService.js')
+const contextService = require('../services/contextService.js')
+const reportService = require('../services/')
 
 const requireScopes = require("../middleware/requireScopes.js");
 const validateRequest = require("../middleware/validateRequest.js");
@@ -21,17 +24,39 @@ router.post('/',
       requireScopes(Scopes.INTAKE_CREATE),
       validateRequest(something),
       loadWorkflowProcess,
+
       async (req, res, next) => {
         try {
-            startDiagnosticWorkflow({
-            processId: req.process.processId,
-            status: req.process.status,
-            fhirRefs: req.process.fhirRefs,
+            diagnosticWorkflowService.startDiagnosticWorkflow({
+                processId: req.process.processId,
+                status: req.process.status,
+                fhirRefs: req.process.fhirRefs,
             });
         } catch (err) {
           next(error);
         }
     });
+
+//GET /diagnostic-workflows/{id}/
+router.get('/:id/',
+      requireAuth,
+      requireScopes(Scopes.WORKFLOW_READ),
+      loadWorkflowProcess,
+      async (req, res, next) => {
+        req.params.id
+        try {
+          let gefunden = await getDiagnosticWorkflowById(req.params.id);
+
+          res.status(200).json({
+            message: 'Befundübersicht zurückgegeben',
+            id : req.params.id,
+            diagnosticReport: gefunden
+          });
+        } catch (err) {
+          next(error);
+        }
+      }
+);
 
 
 //POST /diagnostic-workflows/{id}/radiology-orders
@@ -43,10 +68,10 @@ router.post('/:id/radiology-orders',
       async (req, res, next) => {
         req.params.id
         try {
-            createRadiologyOrder({
-            processId: req.process.processId,
-            status: req.process.status,
-            fhirRefs: req.process.fhirRefs,
+            diagnosticWorkflowService.createRadiologyOrder({
+                processId: req.process.processId,
+                status: req.process.status,
+                fhirRefs: req.process.fhirRefs,
             });
         } catch (err) {
           next(error);
@@ -63,10 +88,10 @@ router.post('/:id/imaging-studies',
       async (req, res, next) => {
         req.params.id
         try {
-            registerImagingStudy({
-            processId: req.process.processId,
-            status: req.process.status,
-            fhirRefs: req.process.fhirRefs,
+            diagnosticWorkflowService.registerImagingStudy({
+                processId: req.process.processId,
+                status: req.process.status,
+                fhirRefs: req.process.fhirRefs,
             });
         } catch (err) {
           next(error);
@@ -82,11 +107,60 @@ router.post('/:id/diagnostic-reports',
       async (req, res, next) => {
         req.params.id
         try {
-            createDiagnosticReport();
+            diagnosticWorkflowService.createDiagnosticReport({
+                processId: req.process.processId,
+                status: req.process.status,
+                fhirRefs: req.process.fhirRefs,
+            }
+);
         } catch (err) {
           next(error);
         }
       });
+
+//GET /diagnostic-workflows/{id}/report-summary
+router.get('/:id/report-summary',
+      requireAuth,
+      requireScopes(Scopes.REPORT_READ),
+      loadWorkflowProcess,
+
+      async (req, res, next) => {
+        req.params.id
+        try {
+          let gefunden = await diagnosticWorkflowService.getDiagnosticWorkflowById(req.params.id);
+
+          res.status(200).json({
+            message: 'Befundübersicht zurückgegeben',
+            id : req.params.id,
+            diagnosticReport: gefunden
+          });
+        } catch (err) {
+          next(error);
+        }
+      }
+);
+
+//GET /diagnostic-workflows/{id}/context
+router.get('/:id/context',
+      requireAuth,
+      requireScopes(Scopes.CONTEXT_READ),
+      loadWorkflowProcess,
+
+      async (req, res, next) => {
+        req.params.id
+        try {
+          let gefunden = await contextService.getWorkflowContext(req.params.id);
+
+          res.status(200).json({
+            message: 'Befundübersicht zurückgegeben',
+            id : req.params.id,
+            diagnosticReport: gefunden
+          });
+        } catch (err) {
+          next(error);
+        }
+      }
+);
 
 //GET /diagnostic-workflows/{id}/events
 router.get('/:id/events',
@@ -110,6 +184,7 @@ router.get('/:id/events',
       }
 );
 
+
 //GET /diagnostic-workflows/{id}/fhir-references
 router.get('/:id/fire-references',
       requireAuth,
@@ -131,30 +206,6 @@ router.get('/:id/fire-references',
         }
       }
 );
-
-
-//GET /diagnostic-workflows/{id}/report-summary
-router.get('/:id/report-summary',
-      requireAuth,
-      requireScopes(Scopes.REPORT_READ),
-      loadWorkflowProcess,
-
-      async (req, res, next) => {
-        req.params.id
-        try {
-          let gefunden = await getDiagnosticWorkflowById(req.params.id);
-
-          res.status(200).json({
-            message: 'Befundübersicht zurückgegeben',
-            id : req.params.id,
-            diagnosticReport: gefunden
-          });
-        } catch (err) {
-          next(error);
-        }
-      }
-);
-
 
 
 module.exports = router;
