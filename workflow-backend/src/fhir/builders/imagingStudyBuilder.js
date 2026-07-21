@@ -10,7 +10,7 @@
  * @returns {Object} FHIR ImagingStudy Resource
  */
 
-export const buildImagingStudyResource = (data) => {
+const buildImagingStudyResource = (data) => {
   const { id, patientRef, encounterRef, studyInstanceUid, modalityCode, modalityDisplay = 'Imaging Study' } = data;
 
   return {
@@ -50,4 +50,8 @@ export const buildImagingStudyResource = (data) => {
       }
     ]
   };
+};
+
+module.exports = {
+  buildImagingStudyResource
 };

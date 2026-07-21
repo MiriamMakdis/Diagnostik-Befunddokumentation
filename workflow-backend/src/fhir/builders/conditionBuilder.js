@@ -10,7 +10,7 @@
  * @returns {Object} FHIR Condition Resource
  */
 
-export const buildConditionResource = (data) => {
+const buildConditionResource = (data) => {
   const { id, patientRef, encounterRef, icdCode, icdDisplay, clinicalStatus = 'active' } = data;
 
   return {
@@ -61,4 +61,8 @@ export const buildConditionResource = (data) => {
       reference: encounterRef
     }
   };
+};
+
+module.exports = {
+  buildConditionResource
 };

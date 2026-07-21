@@ -13,23 +13,54 @@ async function createAuditEventFHIR({ patientFhirId, action, description, outcom
     outcome,
     outcomeDesc: description,
     agent: [{
-      type: { coding: [{ system: 'http://terminology.hl7.org/CodeSystem/v3-ParticipationType', code: 'AUT' }] },
-      who: { display: 'Notaufnahme-System' },
+      type: {
+        coding: [{
+          system: 'http://terminology.hl7.org/CodeSystem/v3-ParticipationType',
+          code: 'AUT'
+        }]
+      },
+      who: {
+        display: 'Notaufnahme-System'
+      },
       requestor: true
     }],
-    source: { observer: { display: 'Diagnostik-Befunddokumentation' } },
-    entity: [{
-      what: { reference: `Patient/${patientFhirId}` },
-      type: { system: 'http://terminology.hl7.org/CodeSystem/audit-entity-type', code: '1', display: 'Person' }
-    }]
+    source: {
+      observer: {
+        display: 'Diagnostik-Befunddokumentation'
+      }
+    },
+    entity: patientFhirId
+      ? [{
+          what: {
+            reference: `Patient/${patientFhirId}`
+          },
+          type: {
+            system: 'http://terminology.hl7.org/CodeSystem/audit-entity-type',
+            code: '1',
+            display: 'Person'
+          }
+        }]
+      : []
   };
 
   const res = await fetch(`${BASE_URL}/AuditEvent`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/fhir+json', Accept: 'application/fhir+json' },
+    headers: {
+      'Content-Type': 'application/fhir+json',
+      Accept: 'application/fhir+json'
+    },
     body: JSON.stringify(body)
   });
+
+  if (!res.ok) {
+    const outcomeBody = await res.json().catch(() => null);
+    console.error('[FHIR AuditEvent Error]:', outcomeBody || res.statusText);
+    throw new Error(`AuditEvent konnte nicht erstellt werden. HTTP ${res.status}`);
+  }
+
   return await res.json();
 }
 
-module.exports = { createAuditEventFHIR };
+module.exports = {
+  createAuditEventFHIR
+};

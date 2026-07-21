@@ -1,6 +1,7 @@
 const ErrorCodes = require("../constants/errorCodes");
-const { getHttpStatusForErrorCode } = require("../constants/errorHttpStatus");
 const WorkflowStatus = require("../constants/workflowStatus");
+const { getMessageForErrorCode } = require("../constants/errorMessages");
+const { getHttpStatusForErrorCode } = require("../constants/errorHttpStatus");
 
 const validateRequest = (schemas) => {
     return (req, res, next) => {
@@ -24,7 +25,7 @@ const validateRequest = (schemas) => {
           status: WorkflowStatus.ERROR,
           errorCode: ErrorCodes.VALIDATION_ERROR,
           message: getMessageForErrorCode(ErrorCodes.VALIDATION_ERROR),
-          details: error.errors?.map((validationError) => ({
+          details: (error.issues || error.errors || []).map((validationError) => ({
             path: validationError.path.join('.'),
             message: validationError.message
           }))

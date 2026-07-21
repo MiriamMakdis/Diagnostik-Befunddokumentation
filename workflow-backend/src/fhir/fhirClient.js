@@ -41,12 +41,20 @@ export const createFhirResource = async (resourceType, resourceData) => {
 * @returns {Promise<Object>} Die FHIR-Ressource
  */
 
-export const readFhirResource = async (resourceType, id) => {
+const readFhirResource = async (resourceTypeOrReference, id) => {
   try {
-    const response = await fhirAxios.get(`/${resourceType}/${id}`);
+    const path = id
+      ? `/${resourceTypeOrReference}/${id}`
+      : `/${resourceTypeOrReference}`;
+
+    const response = await fhirAxios.get(path);
     return response.data;
   } catch (error) {
-    handleFhirError(error, `Fehler beim Lesen von ${resourceType}/${id}`);
+    const label = id
+      ? `${resourceTypeOrReference}/${id}`
+      : resourceTypeOrReference;
+
+    handleFhirError(error, `Fehler beim Lesen von ${label}`);
   }
 };
 
@@ -64,8 +72,21 @@ export const sendTransactionBundle = async (bundleData) => {
   }
 };
 
+export const searchFhirResource = async (resourceType, searchParams = {}) => {
+  try {
+    const response = await fhirAxios.get(`/${resourceType}`, {
+      params: searchParams
+    });
+
+    return response.data;
+  } catch (error) {
+    handleFhirError(error, `Fehler beim Suchen von ${resourceType}`);
+  }
+};
+
 export default {
   createFhirResource,
   readFhirResource,
-  sendTransactionBundle
+  sendTransactionBundle,
+  searchFhirResource
 };

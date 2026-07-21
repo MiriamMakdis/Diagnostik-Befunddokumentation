@@ -9,7 +9,7 @@
  * @param {string} data.conclusion - Der Freitext-Befundberichts-Text
  * @returns {Object} FHIR DiagnosticReport Resource
  */
-export const buildDiagnosticReportResource = (data) => {
+const buildDiagnosticReportResource = (data) => {
   const { id, patientRef, encounterRef, imagingStudyRef, observationRefs = [], conclusion } = data;
 
   const resultReferences = observationRefs.map(obsRef => ({ reference: obsRef }));
@@ -53,4 +53,8 @@ export const buildDiagnosticReportResource = (data) => {
     result: resultReferences,
     conclusion: conclusion
   };
+};
+
+module.exports = {
+  buildDiagnosticReportResource
 };

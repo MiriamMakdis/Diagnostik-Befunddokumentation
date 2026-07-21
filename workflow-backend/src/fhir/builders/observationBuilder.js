@@ -10,7 +10,7 @@
  * @param {string} data.unit - Die Maßeinheit
  * @returns {Object} FHIR Observation Resource
  */
-export const buildObservationResource = (data) => {
+const buildObservationResource = (data) => {
   const { id, patientRef, encounterRef, loincCode, loincDisplay, value, unit } = data;
 
   return {
@@ -52,4 +52,8 @@ export const buildObservationResource = (data) => {
       code: unit
     }
   };
+};
+
+module.exports = {
+  buildObservationResource
 };

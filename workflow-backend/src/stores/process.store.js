@@ -40,21 +40,61 @@ async function updateProcessStatus(processId, status) {
 
 }
 
-async function addFhirReferences(processId, refs) {
+async function addFhirReferences(processId, refs = {}) {
+  const setUpdate = {};
+  const addToSetUpdate = {};
+
+  const arrayFields = [
+    'conditionRefs',
+    'medicationStatementRefs',
+    'observationRefs',
+    'auditEventRefs',
+    'provenanceRefs'
+  ];
+
+  Object.entries(refs).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      return;
+    }
+
+    if (arrayFields.includes(key)) {
+      const values = Array.isArray(value) ? value : [value];
+
+      addToSetUpdate[`fhirRefs.${key}`] = {
+        $each: values.filter(Boolean)
+      };
+
+      return;
+    }
+
+    setUpdate[`fhirRefs.${key}`] = value;
+  });
+
+  setUpdate.updatedAt = new Date();
+
+  const update = {};
+
+  if (Object.keys(setUpdate).length > 0) {
+    update.$set = setUpdate;
+  }
+
+  if (Object.keys(addToSetUpdate).length > 0) {
+    update.$addToSet = addToSetUpdate;
+  }
 
   return await ProcessModel.findOneAndUpdate(
-
     { processId },
-
-    { $set: { fhirRefs: refs, updatedAt: new Date() } },
-
-    { returnDocument: 'after' }
-
+    update,
+    { new: true }
   );
-
 }
+
 async function listProcessesByStatus(status) {
   return await ProcessModel.find({ status }).sort({ createdAt: -1 });
 }
 
-module.exports = { createProcess, findProcessById, updateProcessStatus, addFhirReferences, listProcessesByStatus };
+async function listProcessesByStatuses(statuses) {
+  return ProcessModel.find({ status: { $in: statuses } }).sort({ createdAt: -1 });
+}
+
+module.exports = { createProcess, findProcessById, updateProcessStatus, addFhirReferences, listProcessesByStatus, listProcessesByStatuses };
