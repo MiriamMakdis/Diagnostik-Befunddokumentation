@@ -16,7 +16,7 @@ https://github.com/MiriamMakdis/Diagnostik-Befunddokumentation
 ### Voraussetzungen
 - Docker Desktop installiert
 
-### 1.Public & Private Keys erzeugen
+### 1. Public & Private Keys erzeugen
 ```bash
 yarn keys:generate
 ```
@@ -25,7 +25,7 @@ oder
 node scripts/generateJwtKeys.js
 ```
 
-### 2.Start
+### 2. Start
 ```bash
 docker compose up --build
 ```
