@@ -27,10 +27,10 @@ connectDB();
 app.use(()=>console.log("using stuff"));
 app.use(requireAuth);
 
-app.use('/api/patients', patientRoutes);
-app.use('/api/diagnostic-workflows', workflowRoutes);
-app.use('/emergency', emergencyRoutes);
-app.use('/radiology', radiologyRoutes);
+app.use('/api/v1/patients', patientRoutes);
+app.use('/api/v1/diagnostic-workflows', workflowRoutes);
+app.use('/api/v1/emergency', emergencyRoutes);
+app.use('/api/v1/radiology', radiologyRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'Diagnostik-Befunddokumentation API läuft!' });
