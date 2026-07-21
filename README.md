@@ -72,7 +72,7 @@ Diagnostik-Befunddokumentation/
 
 | Person | Aufgabe |
 |--------|---------|
-| Amna Al-Sorani | MongoDB Schemas, Stores, database.js |
-| Myriam Makdis | FHIR-Client, Resource Builder, Hilfsservices |
+| Amna | MongoDB Schemas, Stores, database.js |
+| Myriam | FHIR-Client, Resource Builder, Hilfsservices |
 | Malte | API-Router, Validierung, OpenAPI |
 | Witalik | Auth-Service, Docker, Middleware, Workflow-Orchestrierung |
